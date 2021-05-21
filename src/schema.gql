@@ -48,7 +48,7 @@ input InstrumentMutation {
 }
 
 input QuoteMutation {
-  instrument_ticker: String!
+  instrument: String!
   timestamp: Timestamp!
 
   """Price in cents"""
