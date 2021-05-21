@@ -1,5 +1,5 @@
 import { Injectable, NotImplementedException } from "@nestjs/common";
-import { Instrument } from "./models/instrument.model";
+import { Instrument } from "./models/instrument-query.dto";
 
 @Injectable()
 export class InstrumentsService {

@@ -1,6 +1,6 @@
 import { Args, Int, Query, Resolver } from "@nestjs/graphql";
 import { InstrumentsService } from "./instruments.service";
-import { Instrument } from "./models/instrument.model";
+import { Instrument } from "./models/instrument-query.dto";
 
 @Resolver((of) => Instrument)
 export class InstrumentsResolver {

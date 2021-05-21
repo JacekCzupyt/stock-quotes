@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { Instrument } from "src/instruments/models/instrument.model";
+import { Instrument } from "src/instruments/models/instrument-query.dto";
 
 @ObjectType()
 export class Quote {
