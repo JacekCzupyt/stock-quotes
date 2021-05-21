@@ -32,6 +32,6 @@ export class InstrumentsResolver {
   addInstrument(
     @Args("newInstrument") newInstrument: InstrumentMutation
   ): Instrument {
-    throw new NotImplementedException();
+    return this.instrumentsService.addNew(newInstrument);
   }
 }

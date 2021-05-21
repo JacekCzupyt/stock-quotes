@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   NotImplementedException,
@@ -37,6 +38,14 @@ export class InstrumentsService {
   }
 
   addNew(instrument: InstrumentMutation): Instrument {
-    throw new NotImplementedException();
+    const found_instrument = this.instruments.find(
+      (inst) => inst.instrument_ticker === instrument.instrument_ticker
+    );
+    if (found_instrument) {
+      throw new BadRequestException(
+        `Instrument with ticker "${instrument.instrument_ticker}" already exists`
+      );
+    }
+    return this.instruments[this.instruments.push({ ...instrument }) - 1];
   }
 }
