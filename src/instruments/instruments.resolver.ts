@@ -1,6 +1,9 @@
+import { NotImplementedException } from "@nestjs/common";
 import { Args, Int, Query, Resolver } from "@nestjs/graphql";
+import { IntSupportOption } from "prettier";
 import { InstrumentsService } from "./instruments.service";
 import { InstrumentInput } from "./models/instrument-input.dto";
+import { InstrumentMutation } from "./models/instrument-mutation.dto";
 import { Instrument } from "./models/instrument-query.dto";
 
 @Resolver((of) => Instrument)
@@ -23,5 +26,12 @@ export class InstrumentsResolver {
     input_instrument: InstrumentInput
   ) {
     return this.instrumentsService.getOne(input_instrument);
+  }
+
+  @Query(() => Instrument)
+  addInstrument(
+    @Args("newInstrument") newInstrument: InstrumentMutation
+  ): Instrument {
+    throw new NotImplementedException();
   }
 }

@@ -71,4 +71,20 @@ describe("InstrumentsResolver", () => {
       ).rejects.toEqual({ error: `No instrument with ticker "${tick}"` });
     });*/
   });
+
+  describe("addInstrument", () => {
+    it("should make a new instrument", async () => {
+      jest.spyOn(service, "addNew").mockImplementation((arg) => ({
+        instrument_ticker: arg.instrument_ticker,
+        instrument_name: arg.instrument_name,
+      }));
+
+      expect(
+        await resolver.addInstrument({
+          instrument_ticker: "TEST",
+          instrument_name: "test",
+        })
+      ).toEqual({ instrument_ticker: "TEST", instrument_name: "test" });
+    });
+  });
 });

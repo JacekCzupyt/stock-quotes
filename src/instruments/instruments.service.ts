@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  NotImplementedException,
+} from "@nestjs/common";
 import { InstrumentInput } from "./models/instrument-input.dto";
+import { InstrumentMutation } from "./models/instrument-mutation.dto";
 import { Instrument } from "./models/instrument-query.dto";
 
 @Injectable()
@@ -29,5 +34,9 @@ export class InstrumentsService {
       );
     }
     return found_instrument;
+  }
+
+  addNew(instrument: InstrumentMutation): Instrument {
+    throw new NotImplementedException();
   }
 }

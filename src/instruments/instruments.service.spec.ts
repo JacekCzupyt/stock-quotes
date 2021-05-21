@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { InstrumentsService } from "./instruments.service";
 
@@ -44,6 +44,35 @@ describe("InstrumentsService", () => {
         service.getOne({ instrument_ticker: "invalid ticker" });
       expect(call).toThrowError(NotFoundException);
       expect(call).toThrowError('No instrument with ticker "invalid ticker"');
+    });
+  });
+
+  describe("addInstrument", () => {
+    it("should add an instruemnt to the array", () => {
+      expect(
+        service.addNew({
+          instrument_ticker: "TEST",
+          instrument_name: "test-instrument",
+        })
+      ).toEqual({
+        instrument_ticker: "TEST",
+        instrument_name: "test-instrument",
+      });
+
+      expect(service.getOne({ instrument_ticker: "TEST" })).toEqual({
+        instrument_ticker: "TEST",
+        instrument_name: "test-instrument",
+      });
+    });
+
+    it("should throw an error", () => {
+      const call = () =>
+        service.addNew({
+          instrument_ticker: "AAPL",
+          instrument_name: "instrument with duplicate id",
+        });
+      expect(call).toThrowError(BadRequestException);
+      expect(call).toThrowError('Instrument with ticker "AAPL" already exists');
     });
   });
 });
