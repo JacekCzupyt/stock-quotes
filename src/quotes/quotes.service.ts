@@ -19,14 +19,14 @@ export class QuotesService {
       price: 229538,
     },
     {
-      id: 3,
+      id: 2,
       instrument: "AAPL",
       timestamp: new Date(1621620906 - 1000 * 3600 * 24),
       price: 12720,
     },
   ];
 
-  getall(): Quote[] {
+  getAll(): Quote[] {
     throw new NotImplementedException();
   }
 

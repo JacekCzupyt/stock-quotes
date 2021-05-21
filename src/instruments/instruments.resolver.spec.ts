@@ -1,4 +1,3 @@
-import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";

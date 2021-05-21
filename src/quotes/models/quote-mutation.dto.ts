@@ -3,7 +3,7 @@ import { Field, InputType, Int, ObjectType } from "@nestjs/graphql";
 @InputType()
 export class QuoteMutation {
   @Field()
-  instrument_ticker: string;
+  instrument: string;
 
   @Field()
   timestamp: Date;
