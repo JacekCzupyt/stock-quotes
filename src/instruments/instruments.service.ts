@@ -25,7 +25,7 @@ export class InstrumentsService {
     );
     if (!found_instrument) {
       throw new NotFoundException(
-        `No instrument with ticker ${input_instrument.instrument_ticker}`
+        `No instrument with ticker "${input_instrument.instrument_ticker}"`
       );
     }
     return found_instrument;

@@ -1,3 +1,4 @@
+import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { InstrumentsService } from "./instruments.service";
 
@@ -28,6 +29,21 @@ describe("InstrumentsService", () => {
           instrument_name: "Alphabet Inc Class A",
         },
       ]);
+    });
+  });
+
+  describe("getOneInstrument", () => {
+    it("should return an instrument", () => {
+      expect(service.getOne({ instrument_ticker: "AAPL" })).toEqual({
+        instrument_ticker: "AAPL",
+        instrument_name: "Apple Inc",
+      });
+    });
+    it("should throw an error", () => {
+      const call = () =>
+        service.getOne({ instrument_ticker: "invalid ticker" });
+      expect(call).toThrowError(NotFoundException);
+      expect(call).toThrowError('No instrument with ticker "invalid ticker"');
     });
   });
 });
