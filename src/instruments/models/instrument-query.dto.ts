@@ -1,9 +1,9 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from "@nestjs/graphql";
 
 @ObjectType()
 export class Instrument {
-  @Field((type) => Int)
-  id: number;
+  @Field()
+  instrumnet_ticker: string;
 
   @Field()
   instrument_name: string;
