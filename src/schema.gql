@@ -2,6 +2,17 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Instrument {
+  instrument_ticker: String!
+  instrument_name: String!
+}
+
 type Query {
   test: String!
+  getInstruments: [Instrument!]!
+  getInstrument(instrumentTicker: InstrumentInput!): Instrument!
+}
+
+input InstrumentInput {
+  instrument_ticker: String!
 }

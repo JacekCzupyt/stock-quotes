@@ -1,5 +1,6 @@
 import { Args, Int, Query, Resolver } from "@nestjs/graphql";
 import { InstrumentsService } from "./instruments.service";
+import { InstrumentInput } from "./models/instrument-input.dto";
 import { Instrument } from "./models/instrument-query.dto";
 
 @Resolver((of) => Instrument)
@@ -17,7 +18,10 @@ export class InstrumentsResolver {
   }
 
   @Query(() => Instrument)
-  getInstrument(@Args("instrumentId", { type: () => Int }) id: number) {
-    return this.instrumentsService.getOne(id);
+  getInstrument(
+    @Args("instrumentTicker")
+    input_instrument: InstrumentInput
+  ) {
+    return this.instrumentsService.getOne(input_instrument);
   }
 }
