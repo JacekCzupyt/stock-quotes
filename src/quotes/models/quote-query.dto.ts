@@ -6,8 +6,8 @@ export class Quote {
   @Field((type) => Int)
   id: number;
 
-  @Field((type) => Instrument, { description: "instrument" })
-  instrument_ticker: string;
+  @Field((type) => Instrument)
+  instrument: string;
 
   @Field()
   timestamp: Date;
