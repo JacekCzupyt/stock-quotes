@@ -1,3 +1,4 @@
+import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";
@@ -51,5 +52,23 @@ describe("InstrumentsResolver", () => {
         })
       ).toEqual(result);
     });
+
+    // TODO: is error handing nessesary here if it's already in the resolver? If so, how to implement properly?
+
+    /*it("should throw an error", async () => {
+      expect.assertions(1);
+
+      jest.spyOn(service, "getOne").mockImplementation((input) => {
+        throw new NotFoundException(
+          `No instrument with ticker "${input.instrument_ticker}"`
+        );
+      });
+
+      let tick = "ticker";
+
+      await expect(
+        await resolver.getInstrument({ instrument_ticker: tick })
+      ).rejects.toEqual({ error: `No instrument with ticker "${tick}"` });
+    });*/
   });
 });
