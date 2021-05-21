@@ -1,4 +1,4 @@
-import { Query, Resolver } from "@nestjs/graphql";
+import { Args, Int, Query, Resolver } from "@nestjs/graphql";
 import { InstrumentsService } from "./instruments.service";
 import { Instrument } from "./models/instrument.model";
 
@@ -9,5 +9,15 @@ export class InstrumentsResolver {
   @Query((returns) => String)
   test() {
     return "test";
+  }
+
+  @Query(() => [Instrument])
+  getInstruments(): Instrument[] {
+    return this.instrumentsService.getAll();
+  }
+
+  @Query(() => Instrument)
+  getInstrument(@Args("instrumentId", { type: () => Int }) id: number) {
+    return this.instrumentsService.getOne(id);
   }
 }
