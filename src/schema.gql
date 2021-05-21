@@ -16,3 +16,12 @@ type Query {
 input InstrumentInput {
   instrument_ticker: String!
 }
+
+type Mutation {
+  addInstrument(newInstrument: InstrumentMutation!): Instrument!
+}
+
+input InstrumentMutation {
+  instrument_ticker: String!
+  instrument_name: String!
+}
