@@ -33,4 +33,23 @@ describe("InstrumentsResolver", () => {
       expect(await resolver.getInstruments()).toBe(result);
     });
   });
+
+  describe("getInstrument", () => {
+    it("should return an instrument", async () => {
+      const result: Instrument = {
+        instrument_ticker: "test-ticker",
+        instrument_name: "test-name",
+      };
+      jest.spyOn(service, "getOne").mockImplementation((input) => ({
+        instrument_ticker: input.instrument_ticker,
+        instrument_name: result.instrument_name,
+      }));
+
+      expect(
+        await resolver.getInstrument({
+          instrument_ticker: result.instrument_ticker,
+        })
+      ).toEqual(result);
+    });
+  });
 });
