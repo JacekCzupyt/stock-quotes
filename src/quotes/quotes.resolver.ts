@@ -19,20 +19,20 @@ export class QuotesResolver {
 
   @Query(() => [Quote])
   getQuotes(): Quote[] {
-    throw new NotImplementedException();
+    return this.quotesService.getAll();
   }
 
   @Query(() => Quote)
   getQuote(
     @Args("quoteInput")
-    qoute_input: QuoteInput
+    quote_input: QuoteInput
   ) {
-    throw new NotImplementedException();
+    return this.quotesService.getOne(quote_input);
   }
 
   @Mutation(() => Quote)
   addQuote(@Args("newQuote") new_Quote: QuoteMutation): Quote {
-    throw new NotImplementedException();
+    return this.quotesService.addNew(new_Quote);
   }
 
   @ResolveField("instrument", (returns) => Instrument)

@@ -1,4 +1,8 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  NotImplementedException,
+} from "@nestjs/common";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote-query.dto";
@@ -27,14 +31,19 @@ export class QuotesService {
   ];
 
   getAll(): Quote[] {
-    throw new NotImplementedException();
+    return this.quotes;
   }
 
   getOne(quoteInput: QuoteInput): Quote {
-    throw new NotImplementedException();
+    const found_quote = this.quotes.find((inst) => inst.id === quoteInput.id);
+    if (!found_quote) {
+      throw new NotFoundException(`No quote with id "${quoteInput.id}"`);
+    }
+    return found_quote;
   }
 
   addNew(quote: QuoteMutation): Quote {
-    throw new NotImplementedException();
+    let new_quote: Quote = { id: this.quotes.length, ...quote };
+    return this.quotes[this.quotes.push(new_quote) - 1];
   }
 }
