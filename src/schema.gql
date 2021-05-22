@@ -1,0 +1,56 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Quote {
+  id: Int!
+  instrument: Instrument!
+  timestamp: Timestamp!
+
+  """Price in cents"""
+  price: Int!
+}
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
+
+type Instrument {
+  instrument_ticker: String!
+  instrument_name: String!
+  quotes: [Quote!]!
+}
+
+type Query {
+  getInstruments: [Instrument!]!
+  getInstrument(instrumentTicker: InstrumentInput!): Instrument!
+  getQuotes: [Quote!]!
+  getQuote(quoteInput: QuoteInput!): Quote!
+}
+
+input InstrumentInput {
+  instrument_ticker: String!
+}
+
+input QuoteInput {
+  id: Int!
+}
+
+type Mutation {
+  addInstrument(newInstrument: InstrumentMutation!): Instrument!
+  addQuote(newQuote: QuoteMutation!): Quote!
+}
+
+input InstrumentMutation {
+  instrument_ticker: String!
+  instrument_name: String!
+}
+
+input QuoteMutation {
+  instrument: String!
+  timestamp: Timestamp!
+
+  """Price in cents"""
+  price: Int!
+}
