@@ -1,4 +1,6 @@
+import { forwardRef } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { QuotesModule } from "../quotes/quotes.module";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";
 import { Instrument } from "./models/instrument-query.dto";
@@ -10,6 +12,7 @@ describe("InstrumentsResolver", () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [InstrumentsResolver, InstrumentsService],
+      imports: [forwardRef(() => QuotesModule)],
     }).compile();
 
     service = module.get<InstrumentsService>(InstrumentsService);

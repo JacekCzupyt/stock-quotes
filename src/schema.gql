@@ -23,7 +23,6 @@ type Instrument {
 }
 
 type Query {
-  test: String!
   getInstruments: [Instrument!]!
   getInstrument(instrumentTicker: InstrumentInput!): Instrument!
   getQuotes: [Quote!]!

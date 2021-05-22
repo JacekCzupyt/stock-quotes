@@ -9,7 +9,7 @@ import {
   Resolver,
 } from "@nestjs/graphql";
 import { IntSupportOption } from "prettier";
-import { QuotesService } from "src/quotes/quotes.service";
+import { QuotesService } from "../quotes/quotes.service";
 import { Quote } from "../quotes/models/quote-query.dto";
 import { InstrumentsModule } from "./instruments.module";
 import { InstrumentsService } from "./instruments.service";
@@ -23,11 +23,6 @@ export class InstrumentsResolver {
     private instrumentsService: InstrumentsService,
     private quotesService: QuotesService
   ) {}
-
-  @Query((returns) => String)
-  test() {
-    return "test";
-  }
 
   @Query(() => [Instrument])
   getInstruments(): Instrument[] {
