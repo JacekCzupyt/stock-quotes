@@ -1,4 +1,4 @@
-import { NotImplementedException } from "@nestjs/common";
+import { forwardRef, Inject, NotImplementedException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -18,6 +18,7 @@ import { QuotesService } from "./quotes.service";
 export class QuotesResolver {
   constructor(
     private readonly quotesService: QuotesService,
+    //@Inject(forwardRef(() => InstrumentsService))
     private readonly instrumentsService: InstrumentsService
   ) {}
 

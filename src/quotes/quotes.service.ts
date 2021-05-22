@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  NotImplementedException,
+} from "@nestjs/common";
+import { InstrumentInput } from "../instruments/models/instrument-input.dto";
 import { InstrumentsService } from "../instruments/instruments.service";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
@@ -6,7 +13,10 @@ import { Quote } from "./models/quote-query.dto";
 
 @Injectable()
 export class QuotesService {
-  constructor(private readonly instrumentsService: InstrumentsService) {}
+  constructor(
+    //@Inject(forwardRef(() => InstrumentsService))
+    private readonly instrumentsService: InstrumentsService
+  ) {}
 
   public static defaultArrayState = () => [
     {
@@ -48,5 +58,9 @@ export class QuotesService {
     this.instrumentsService.getOne({ instrument_ticker: quote.instrument });
     let new_quote: Quote = { id: this.quotes.length, ...quote };
     return this.quotes[this.quotes.push(new_quote) - 1];
+  }
+
+  getByInstrument(input: InstrumentInput): Quote[] {
+    throw new NotImplementedException();
   }
 }

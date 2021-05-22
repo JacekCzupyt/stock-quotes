@@ -1,5 +1,6 @@
-import { NotFoundException } from "@nestjs/common";
+import { forwardRef, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { InstrumentInput } from "../instruments/models/instrument-input.dto";
 import { InstrumentsModule } from "../instruments/instruments.module";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { QuotesService } from "./quotes.service";
@@ -10,7 +11,8 @@ describe("QuotesService", () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [QuotesService],
-      imports: [InstrumentsModule],
+      // TODO: verify if this is fine, should it be a new test module?
+      imports: [forwardRef(() => InstrumentsModule)],
     }).compile();
 
     service = module.get<QuotesService>(QuotesService);
@@ -68,6 +70,27 @@ describe("QuotesService", () => {
       const call = () => service.addNew(quote);
       expect(call).toThrowError(NotFoundException);
       expect(call).toThrowError('No instrument with ticker "INVALID-TICKER"');
+    });
+  });
+
+  describe("getQuotesByInstrument", () => {
+    it("should return an array of quotes", () => {
+      let input: InstrumentInput = { instrument_ticker: "AAPL" };
+
+      expect(service.getByInstrument(input)).toEqual([
+        {
+          id: 0,
+          instrument: "AAPL",
+          timestamp: new Date(1621620906000),
+          price: 12600,
+        },
+        {
+          id: 2,
+          instrument: "AAPL",
+          timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
+          price: 12720,
+        },
+      ]);
     });
   });
 });
