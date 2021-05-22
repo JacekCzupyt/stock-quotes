@@ -61,6 +61,8 @@ export class QuotesService {
   }
 
   getByInstrument(input: InstrumentInput): Quote[] {
-    throw new NotImplementedException();
+    return this.quotes.filter(
+      (quote) => quote.instrument === input.instrument_ticker
+    );
   }
 }
