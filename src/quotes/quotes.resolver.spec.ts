@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { InstrumentsModule } from "../instruments/instruments.module";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote-query.dto";
 import { QuotesResolver } from "./quotes.resolver";
@@ -11,6 +12,7 @@ describe("QuotesResolver", () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [QuotesResolver, QuotesService],
+      imports: [InstrumentsModule],
     }).compile();
 
     service = module.get<QuotesService>(QuotesService);

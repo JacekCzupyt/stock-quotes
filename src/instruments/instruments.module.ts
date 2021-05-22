@@ -4,5 +4,6 @@ import { InstrumentsService } from "./instruments.service";
 
 @Module({
   providers: [InstrumentsResolver, InstrumentsService],
+  exports: [InstrumentsService],
 })
 export class InstrumentsModule {}
