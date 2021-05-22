@@ -20,37 +20,15 @@ describe("QuotesService", () => {
 
   describe("getQuotes", () => {
     it("should return an array of qoutes", () => {
-      expect(service.getAll()).toEqual([
-        {
-          id: 0,
-          instrument: "AAPL",
-          timestamp: new Date(1621620906000),
-          price: 12600,
-        },
-        {
-          id: 1,
-          instrument: "GOOGL",
-          timestamp: new Date(1621620906 - 1000 * 3600 * 24),
-          price: 229538,
-        },
-        {
-          id: 2,
-          instrument: "AAPL",
-          timestamp: new Date(1621620906 - 1000 * 3600 * 24),
-          price: 12720,
-        },
-      ]);
+      expect(service.getAll()).toEqual(QuotesService.defaultArrayState());
     });
   });
 
   describe("getQuote", () => {
     it("should return a qoute", () => {
-      expect(service.getOne({ id: 1 })).toEqual({
-        id: 1,
-        instrument: "GOOGL",
-        timestamp: new Date(1621620906 - 1000 * 3600 * 24),
-        price: 229538,
-      });
+      expect(service.getOne({ id: 1 })).toEqual(
+        QuotesService.defaultArrayState()[1]
+      );
     });
     it("should throw an error", () => {
       const call = () => service.getOne({ id: -1 });

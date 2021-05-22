@@ -9,7 +9,7 @@ import { Quote } from "./models/quote-query.dto";
 
 @Injectable()
 export class QuotesService {
-  private quotes: Quote[] = [
+  public static defaultArrayState = () => [
     {
       id: 0,
       instrument: "AAPL",
@@ -19,16 +19,18 @@ export class QuotesService {
     {
       id: 1,
       instrument: "GOOGL",
-      timestamp: new Date(1621620906 - 1000 * 3600 * 24),
+      timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
       price: 229538,
     },
     {
       id: 2,
       instrument: "AAPL",
-      timestamp: new Date(1621620906 - 1000 * 3600 * 24),
+      timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
       price: 12720,
     },
   ];
+
+  private quotes: Quote[] = QuotesService.defaultArrayState();
 
   getAll(): Quote[] {
     return this.quotes;
