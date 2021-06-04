@@ -25,22 +25,22 @@ export class InstrumentsResolver {
   ) {}
 
   @Query(() => [Instrument])
-  getInstruments(): Instrument[] {
+  async getInstruments(): Promise<Instrument[]> {
     return this.instrumentsService.getAll();
   }
 
   @Query(() => Instrument)
-  getInstrument(
+  async getInstrument(
     @Args("instrumentTicker")
     input_instrument: InstrumentInput
-  ) {
+  ): Promise<Instrument> {
     return this.instrumentsService.getOne(input_instrument);
   }
 
   @Mutation(() => Instrument)
-  addInstrument(
+  async addInstrument(
     @Args("newInstrument") newInstrument: InstrumentMutation
-  ): Instrument {
+  ): Promise<Instrument> {
     return this.instrumentsService.addNew(newInstrument);
   }
 
