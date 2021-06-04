@@ -10,14 +10,19 @@ import { InstrumentsService } from "../instruments/instruments.service";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote-query.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { QuoteEntity } from "./models/quote.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class QuotesService {
   constructor(
-    //@Inject(forwardRef(() => InstrumentsService))
-    private readonly instrumentsService: InstrumentsService
+    private readonly instrumentsService: InstrumentsService,
+    @InjectRepository(QuoteEntity)
+    private quotesRepository: Repository<QuoteEntity>
   ) {}
 
+  //TODO: inject default values?
   public static defaultArrayState = () => [
     {
       id: 0,
@@ -41,28 +46,31 @@ export class QuotesService {
 
   private quotes: Quote[] = QuotesService.defaultArrayState();
 
-  getAll(): Quote[] {
-    return this.quotes;
+  async getAll(): Promise<Quote[]> {
+    return this.quotesRepository.find();
   }
 
-  getOne(quoteInput: QuoteInput): Quote {
-    const found_quote = this.quotes.find((inst) => inst.id === quoteInput.id);
-    if (!found_quote) {
+  async getOne(quoteInput: QuoteInput): Promise<Quote> {
+    return this.quotesRepository.findOne(quoteInput.id);
+    /*if (!found_quote) {
       throw new NotFoundException(`No quote with id "${quoteInput.id}"`);
     }
-    return found_quote;
+    return found_quote;*/
   }
 
-  addNew(quote: QuoteMutation): Quote {
+  async addNew(quote: QuoteMutation): Promise<Quote> {
+    //TODO: reimplement instrument validation
+    /*
     //throws error if no instrument with provided ticker is present
     this.instrumentsService.getOne({ instrument_ticker: quote.instrument });
-    let new_quote: Quote = { id: this.quotes.length, ...quote };
-    return this.quotes[this.quotes.push(new_quote) - 1];
+    let new_quote: Quote = { id: this.quotes.length, ...quote };*/
+
+    return this.quotesRepository.save({ ...quote });
   }
 
-  getByInstrument(input: InstrumentInput): Quote[] {
-    return this.quotes.filter(
-      (quote) => quote.instrument === input.instrument_ticker
-    );
+  async getByInstrument(input: InstrumentInput): Promise<Quote[]> {
+    return this.quotesRepository.find({
+      where: { instrument: input.instrument_ticker },
+    });
   }
 }

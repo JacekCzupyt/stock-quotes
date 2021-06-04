@@ -18,30 +18,29 @@ import { QuotesService } from "./quotes.service";
 export class QuotesResolver {
   constructor(
     private readonly quotesService: QuotesService,
-    //@Inject(forwardRef(() => InstrumentsService))
     private readonly instrumentsService: InstrumentsService
   ) {}
 
   @Query(() => [Quote])
-  getQuotes(): Quote[] {
+  async getQuotes(): Promise<Quote[]> {
     return this.quotesService.getAll();
   }
 
   @Query(() => Quote)
-  getQuote(
+  async getQuote(
     @Args("quoteInput")
     quote_input: QuoteInput
-  ) {
+  ): Promise<Quote> {
     return this.quotesService.getOne(quote_input);
   }
 
   @Mutation(() => Quote)
-  addQuote(@Args("newQuote") new_Quote: QuoteMutation): Quote {
+  async addQuote(@Args("newQuote") new_Quote: QuoteMutation): Promise<Quote> {
     return this.quotesService.addNew(new_Quote);
   }
 
   @ResolveField("instrument", (returns) => Instrument)
-  getInstrument(@Parent() quote: Quote) {
+  async getInstrument(@Parent() quote: Quote): Promise<Instrument> {
     return this.instrumentsService.getOne({
       instrument_ticker: quote.instrument,
     });
