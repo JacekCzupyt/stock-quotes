@@ -3,7 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { QuotesModule } from "../quotes/quotes.module";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";
-import { Instrument } from "./models/instrument-query.dto";
+import { Instrument } from "./models/instrument.entity";
 
 describe("InstrumentsResolver", () => {
   let resolver: InstrumentsResolver;

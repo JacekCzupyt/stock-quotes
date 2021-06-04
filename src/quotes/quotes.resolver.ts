@@ -8,10 +8,10 @@ import {
   Resolver,
 } from "@nestjs/graphql";
 import { InstrumentsService } from "../instruments/instruments.service";
-import { Instrument } from "../instruments/models/instrument-query.dto";
+import { Instrument } from "../instruments/models/instrument.entity";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
-import { Quote } from "./models/quote-query.dto";
+import { Quote } from "./models/quote.entity";
 import { QuotesService } from "./quotes.service";
 
 @Resolver(() => Quote)
@@ -39,10 +39,10 @@ export class QuotesResolver {
     return this.quotesService.addNew(new_Quote);
   }
 
-  @ResolveField("instrument", (returns) => Instrument)
+  /*@ResolveField("instrument", (returns) => Instrument)
   async getInstrument(@Parent() quote: Quote): Promise<Instrument> {
     return this.instrumentsService.getOne({
       instrument_ticker: quote.instrument,
     });
-  }
+  }*/
 }

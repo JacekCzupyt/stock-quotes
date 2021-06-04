@@ -2,7 +2,7 @@ import { forwardRef } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { InstrumentsModule } from "../instruments/instruments.module";
 import { QuoteMutation } from "./models/quote-mutation.dto";
-import { Quote } from "./models/quote-query.dto";
+import { Quote } from "./models/quote.entity";
 import { QuotesResolver } from "./quotes.resolver";
 import { QuotesService } from "./quotes.service";
 

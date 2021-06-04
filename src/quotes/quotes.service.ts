@@ -9,17 +9,16 @@ import { InstrumentInput } from "../instruments/models/instrument-input.dto";
 import { InstrumentsService } from "../instruments/instruments.service";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
-import { Quote } from "./models/quote-query.dto";
+import { Quote } from "./models/quote.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { QuoteEntity } from "./models/quote.entity";
 import { Repository } from "typeorm";
 
 @Injectable()
 export class QuotesService {
   constructor(
     private readonly instrumentsService: InstrumentsService,
-    @InjectRepository(QuoteEntity)
-    private quotesRepository: Repository<QuoteEntity>
+    @InjectRepository(Quote)
+    private quotesRepository: Repository<Quote>
   ) {}
 
   //TODO: inject default values?
@@ -44,7 +43,7 @@ export class QuotesService {
     },
   ];
 
-  private quotes: Quote[] = QuotesService.defaultArrayState();
+  //private quotes: Quote[] = QuotesService.defaultArrayState();
 
   async getAll(): Promise<Quote[]> {
     return this.quotesRepository.find();
@@ -64,8 +63,10 @@ export class QuotesService {
     //throws error if no instrument with provided ticker is present
     this.instrumentsService.getOne({ instrument_ticker: quote.instrument });
     let new_quote: Quote = { id: this.quotes.length, ...quote };*/
-
-    return this.quotesRepository.save({ ...quote });
+    const inst = await this.instrumentsService.getOne({
+      instrument_ticker: quote.instrument,
+    });
+    return this.quotesRepository.save({ ...quote, instrument: inst });
   }
 
   async getByInstrument(input: InstrumentInput): Promise<Quote[]> {

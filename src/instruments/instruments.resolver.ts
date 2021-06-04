@@ -10,12 +10,12 @@ import {
 } from "@nestjs/graphql";
 import { IntSupportOption } from "prettier";
 import { QuotesService } from "../quotes/quotes.service";
-import { Quote } from "../quotes/models/quote-query.dto";
+import { Quote } from "../quotes/models/quote.entity";
 import { InstrumentsModule } from "./instruments.module";
 import { InstrumentsService } from "./instruments.service";
 import { InstrumentInput } from "./models/instrument-input.dto";
 import { InstrumentMutation } from "./models/instrument-mutation.dto";
-import { Instrument } from "./models/instrument-query.dto";
+import { Instrument } from "./models/instrument.entity";
 
 @Resolver((of) => Instrument)
 export class InstrumentsResolver {

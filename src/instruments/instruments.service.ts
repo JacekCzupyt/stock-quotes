@@ -8,14 +8,13 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { InstrumentInput } from "./models/instrument-input.dto";
 import { InstrumentMutation } from "./models/instrument-mutation.dto";
-import { Instrument } from "./models/instrument-query.dto";
-import { InstrumentEntity } from "./models/instrument.entity";
+import { Instrument } from "./models/instrument.entity";
 
 @Injectable()
 export class InstrumentsService {
   constructor(
-    @InjectRepository(InstrumentEntity)
-    private instrumentsRepository: Repository<InstrumentEntity>
+    @InjectRepository(Instrument)
+    private instrumentsRepository: Repository<Instrument>
   ) {}
 
   //TODO: insert into repository
