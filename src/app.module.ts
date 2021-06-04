@@ -5,6 +5,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { join } from "path";
 import { InstrumentsModule } from "./instruments/instruments.module";
 import { QuotesModule } from "./quotes/quotes.module";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { QuotesModule } from "./quotes/quotes.module";
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
       buildSchemaOptions: { dateScalarMode: "timestamp" },
     }),
+    TypeOrmModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
