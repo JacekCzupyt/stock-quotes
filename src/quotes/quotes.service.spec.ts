@@ -109,11 +109,17 @@ describe("QuotesService", () => {
   });
 
   describe("addQuote", () => {
-    it("should add an quote to the array", () => {
-      expect(service.addNew(quoteMutation)).resolves.toEqual({
+    it("should add an quote to the array", async () => {
+      const call = () => service.addNew(quoteMutation);
+      await expect(call()).resolves.toEqual({
         ...quoteMutation,
         instrument: mockInstrument,
         id: 1,
+      });
+
+      expect(instrumentService.getOne).toBeCalledTimes(1);
+      expect(instrumentService.getOne).toBeCalledWith({
+        instrument_ticker: quoteMutation.instrument,
       });
 
       expect(repo.save).toBeCalledTimes(1);
@@ -121,9 +127,6 @@ describe("QuotesService", () => {
         ...quoteMutation,
         instrument: mockInstrument,
       });
-
-      expect(instrumentService.getOne).toBeCalledTimes(1);
-      expect(instrumentService.getOne).toBeCalledWith(quoteMutation.instrument);
     });
 
     it("should throw an error", () => {
@@ -134,31 +137,10 @@ describe("QuotesService", () => {
         );
 
       const call = () => service.addNew(quoteMutation);
-      expect(call()).toThrowError(NotFoundException);
-      expect(call()).toThrowError('No instrument with ticker "AAPL"');
+      expect(call()).rejects.toThrowError(NotFoundException);
+      expect(call()).rejects.toThrowError('No instrument with ticker "AAPL"');
 
       expect(repo.save).toBeCalledTimes(0);
     });
   });
-
-  // describe("getQuotesByInstrument", () => {
-  //   it("should return an array of quotes", () => {
-  //     let input: InstrumentInput = { instrument_ticker: "AAPL" };
-
-  //     expect(service.getByInstrument(input)).toEqual([
-  //       {
-  //         id: 0,
-  //         instrument: "AAPL",
-  //         timestamp: new Date(1621620906000),
-  //         price: 12600,
-  //       },
-  //       {
-  //         id: 2,
-  //         instrument: "AAPL",
-  //         timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
-  //         price: 12720,
-  //       },
-  //     ]);
-  //   });
-  // });
 });
