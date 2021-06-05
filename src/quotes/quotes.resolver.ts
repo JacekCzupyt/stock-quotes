@@ -16,10 +16,7 @@ import { QuotesService } from "./quotes.service";
 
 @Resolver(() => Quote)
 export class QuotesResolver {
-  constructor(
-    private readonly quotesService: QuotesService,
-    private readonly instrumentsService: InstrumentsService
-  ) {}
+  constructor(private readonly quotesService: QuotesService) {}
 
   @Query(() => [Quote])
   async getQuotes(): Promise<Quote[]> {
@@ -38,11 +35,4 @@ export class QuotesResolver {
   async addQuote(@Args("newQuote") new_Quote: QuoteMutation): Promise<Quote> {
     return this.quotesService.addNew(new_Quote);
   }
-
-  /*@ResolveField("instrument", (returns) => Instrument)
-  async getInstrument(@Parent() quote: Quote): Promise<Instrument> {
-    return this.instrumentsService.getOne({
-      instrument_ticker: quote.instrument,
-    });
-  }*/
 }
