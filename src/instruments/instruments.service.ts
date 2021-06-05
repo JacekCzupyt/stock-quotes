@@ -43,9 +43,6 @@ export class InstrumentsService {
       await this.instrumentsRepository.findOneOrFail(
         instrument.instrument_ticker
       );
-      throw new BadRequestException(
-        `Instrument with ticker "${instrument.instrument_ticker}" already exists`
-      );
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         return this.instrumentsRepository.save({ ...instrument });
@@ -53,5 +50,8 @@ export class InstrumentsService {
         throw e;
       }
     }
+    throw new BadRequestException(
+      `Instrument with ticker "${instrument.instrument_ticker}" already exists`
+    );
   }
 }
