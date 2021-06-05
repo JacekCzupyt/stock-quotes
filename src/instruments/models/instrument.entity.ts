@@ -15,5 +15,5 @@ export class Instrument {
 
   @Field(() => [Quote])
   @OneToMany((type) => Quote, (quote) => quote.instrument)
-  quotes?: Quote[];
+  quotes: Promise<Quote[]>;
 }

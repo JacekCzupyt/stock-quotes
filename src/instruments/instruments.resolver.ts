@@ -44,10 +44,10 @@ export class InstrumentsResolver {
     return this.instrumentsService.addNew(newInstrument);
   }
 
-  @ResolveField("quotes", (returns) => [Quote])
+  /*@ResolveField("quotes", (returns) => [Quote])
   getQuotes(@Parent() instrument: Instrument) {
     return this.quotesService.getByInstrument({
       instrument_ticker: instrument.instrument_ticker,
     });
-  }
+  }*/
 }

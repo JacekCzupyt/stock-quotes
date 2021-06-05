@@ -9,7 +9,9 @@ export class Quote {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne((type) => Instrument, (instrument) => instrument.quotes)
+  @ManyToOne((type) => Instrument, (instrument) => instrument.quotes, {
+    eager: true,
+  })
   @Field((type) => Instrument)
   instrument: Instrument;
 

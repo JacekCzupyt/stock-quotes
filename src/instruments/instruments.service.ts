@@ -18,16 +18,18 @@ export class InstrumentsService {
   ) {}
 
   //TODO: insert into repository
-  private instruments: Instrument[] = [
-    {
-      instrument_ticker: "AAPL",
-      instrument_name: "Apple Inc",
-    },
-    {
-      instrument_ticker: "GOOGL",
-      instrument_name: "Alphabet Inc Class A",
-    },
-  ];
+  // private instruments: Instrument[] = [
+  //   {
+  //     instrument_ticker: "AAPL",
+  //     instrument_name: "Apple Inc",
+  //     quotes: [],
+  //   },
+  //   {
+  //     instrument_ticker: "GOOGL",
+  //     instrument_name: "Alphabet Inc Class A",
+  //     quotes: [],
+  //   },
+  // ];
 
   async getAll(): Promise<Instrument[]> {
     return this.instrumentsRepository.find();
