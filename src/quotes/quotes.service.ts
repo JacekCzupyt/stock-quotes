@@ -11,7 +11,7 @@ import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityNotFoundError, Not, Repository } from "typeorm";
 
 @Injectable()
 export class QuotesService {
@@ -21,28 +21,6 @@ export class QuotesService {
     private quotesRepository: Repository<Quote>
   ) {}
 
-  //TODO: inject default values?
-  public static defaultArrayState = () => [
-    {
-      id: 0,
-      instrument: "AAPL",
-      timestamp: new Date(1621620906000),
-      price: 12600,
-    },
-    {
-      id: 1,
-      instrument: "GOOGL",
-      timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
-      price: 229538,
-    },
-    {
-      id: 2,
-      instrument: "AAPL",
-      timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
-      price: 12720,
-    },
-  ];
-
   //private quotes: Quote[] = QuotesService.defaultArrayState();
 
   async getAll(): Promise<Quote[]> {
@@ -50,28 +28,25 @@ export class QuotesService {
   }
 
   async getOne(quoteInput: QuoteInput): Promise<Quote> {
-    return this.quotesRepository.findOne(quoteInput.id);
-    /*if (!found_quote) {
-      throw new NotFoundException(`No quote with id "${quoteInput.id}"`);
+    try {
+      return await this.quotesRepository.findOneOrFail(quoteInput.id);
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        throw new NotFoundException(`No quote with id "${quoteInput.id}"`);
+      } else {
+        throw e;
+      }
     }
-    return found_quote;*/
   }
 
   async addNew(quote: QuoteMutation): Promise<Quote> {
-    //TODO: reimplement instrument validation
-    /*
     //throws error if no instrument with provided ticker is present
-    this.instrumentsService.getOne({ instrument_ticker: quote.instrument });
-    let new_quote: Quote = { id: this.quotes.length, ...quote };*/
-    const inst = await this.instrumentsService.getOne({
-      instrument_ticker: quote.instrument,
-    });
-    return this.quotesRepository.save({ ...quote, instrument: inst });
-  }
-
-  async getByInstrument(input: InstrumentInput): Promise<Quote[]> {
-    return this.quotesRepository.find({
-      where: { instrument: input.instrument_ticker },
-    });
+    return this.instrumentsService
+      .getOne({
+        instrument_ticker: quote.instrument,
+      })
+      .then((inst) =>
+        this.quotesRepository.save({ ...quote, instrument: inst })
+      );
   }
 }
