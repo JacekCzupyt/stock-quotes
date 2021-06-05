@@ -52,7 +52,7 @@ describe("InstrumentsService", () => {
 
   describe("getAllInstruments", () => {
     it("should return an array of instruments", async () => {
-      expect(await service.getAll()).toEqual(instrumentsArray);
+      expect(service.getAll()).resolves.toEqual(instrumentsArray);
     });
   });
 

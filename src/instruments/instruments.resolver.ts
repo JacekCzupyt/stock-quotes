@@ -19,10 +19,7 @@ import { Instrument } from "./models/instrument.entity";
 
 @Resolver((of) => Instrument)
 export class InstrumentsResolver {
-  constructor(
-    private instrumentsService: InstrumentsService,
-    private quotesService: QuotesService
-  ) {}
+  constructor(private instrumentsService: InstrumentsService) {}
 
   @Query(() => [Instrument])
   async getInstruments(): Promise<Instrument[]> {
