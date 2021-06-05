@@ -73,8 +73,8 @@ describe("InstrumentsService", () => {
 
       const call = () =>
         service.getOne({ instrument_ticker: "invalid ticker" });
-      expect(call()).resolves.toThrowError(NotFoundException);
-      expect(call()).resolves.toThrowError(
+      expect(call()).rejects.toThrowError(NotFoundException);
+      expect(call()).rejects.toThrowError(
         'No instrument with ticker "invalid ticker"'
       );
 
@@ -117,8 +117,8 @@ describe("InstrumentsService", () => {
           instrument_ticker: "AAPL",
           instrument_name: "instrument with duplicate id",
         });
-      expect(call()).resolves.toThrowError(BadRequestException);
-      expect(call()).resolves.toThrowError(
+      expect(call()).rejects.toThrowError(BadRequestException);
+      expect(call()).rejects.toThrowError(
         'Instrument with ticker "AAPL" already exists'
       );
 

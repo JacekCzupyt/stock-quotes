@@ -116,7 +116,7 @@ describe("InstrumentsResolver", () => {
         .spyOn(service, "addNew")
         .mockImplementation(async (input) => {
           throw new BadRequestException(
-            `Instrument with ticker "${input.instrument_ticker}" already exists`
+            `No instrument with ticker "${input.instrument_ticker}"`
           );
         });
 

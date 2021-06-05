@@ -90,7 +90,7 @@ describe("QuotesService", () => {
 
   describe("getQuote", () => {
     it("should return a qoute", () => {
-      expect(service.getOne({ id: 1 })).resolves.toEqual(quotesArray[1]);
+      expect(service.getOne({ id: 1 })).resolves.toEqual(quotesArray[0]);
       expect(repo.findOneOrFail).toBeCalledWith(1);
     });
     it("should throw an error", () => {
@@ -101,8 +101,8 @@ describe("QuotesService", () => {
         });
 
       const call = () => service.getOne({ id: -1 });
-      expect(call()).resolves.toThrowError(NotFoundException);
-      expect(call()).resolves.toThrowError('No quote with id "-1"');
+      expect(call()).rejects.toThrowError(NotFoundException);
+      expect(call()).rejects.toThrowError('No quote with id "-1"');
 
       expect(repoSpy).toBeCalledWith(-1);
     });
