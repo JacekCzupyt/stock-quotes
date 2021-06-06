@@ -10,12 +10,12 @@ const instrumentsArray: Instrument[] = [
   {
     instrument_ticker: "AAPL",
     instrument_name: "Apple Inc",
-    quotes: Promise.resolve([]),
+    quotes: [],
   },
   {
     instrument_ticker: "GOOGL",
     instrument_name: "Alphabet Inc Class A",
-    quotes: Promise.resolve([]),
+    quotes: [],
   },
 ];
 

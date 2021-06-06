@@ -14,6 +14,8 @@ export class Instrument {
   instrument_name: string;
 
   @Field(() => [Quote])
-  @OneToMany((type) => Quote, (quote) => quote.instrument)
-  quotes: Promise<Quote[]>;
+  @OneToMany((type) => Quote, (quote) => quote.instrument, {
+    lazy: true,
+  })
+  quotes: Quote[];
 }

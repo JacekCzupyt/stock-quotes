@@ -10,7 +10,7 @@ export class Quote {
   id: number;
 
   @ManyToOne((type) => Instrument, (instrument) => instrument.quotes, {
-    eager: true,
+    lazy: true,
   })
   @Field((type) => Instrument)
   instrument: Instrument;

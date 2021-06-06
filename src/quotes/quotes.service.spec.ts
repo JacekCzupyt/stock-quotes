@@ -40,7 +40,7 @@ let quoteMutation: QuoteMutation = {
 let mockInstrument: Instrument = {
   instrument_ticker: "AAPL",
   instrument_name: "Apple Inc",
-  quotes: Promise.resolve([]),
+  quotes: [],
 };
 
 describe("QuotesService", () => {
@@ -60,8 +60,11 @@ describe("QuotesService", () => {
             save: jest
               .fn()
               .mockImplementation(async (quote): Promise<Quote> => {
-                return { ...quote, id: 1 };
+                return quote;
               }),
+            create: jest.fn().mockImplementation(async (quote) => {
+              return { ...quote, id: 1 };
+            }),
           },
         },
         {
@@ -122,11 +125,20 @@ describe("QuotesService", () => {
         instrument_ticker: quoteMutation.instrument,
       });
 
-      expect(repo.save).toBeCalledTimes(1);
-      expect(repo.save).toBeCalledWith({
+      expect(repo.create).toBeCalledTimes(1);
+      expect(repo.create).toBeCalledWith({
         ...quoteMutation,
         instrument: mockInstrument,
       });
+
+      expect(repo.save).toBeCalledTimes(1);
+      expect(repo.save).toBeCalledWith(
+        Promise.reject({
+          ...quoteMutation,
+          instrument: mockInstrument,
+          id: 1,
+        })
+      );
     });
 
     it("should throw an error", () => {

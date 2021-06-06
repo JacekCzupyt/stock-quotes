@@ -41,7 +41,7 @@ let quoteMutation: QuoteMutation = {
 let mockInstrument: Instrument = {
   instrument_ticker: "AAPL",
   instrument_name: "Apple Inc",
-  quotes: Promise.resolve([]),
+  quotes: [],
 };
 
 describe("QuotesResolver", () => {

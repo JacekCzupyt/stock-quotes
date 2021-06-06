@@ -46,7 +46,9 @@ export class QuotesService {
         instrument_ticker: quote.instrument,
       })
       .then((inst) =>
-        this.quotesRepository.save({ ...quote, instrument: inst })
+        this.quotesRepository.save(
+          this.quotesRepository.create({ ...quote, instrument: inst })
+        )
       );
   }
 }
