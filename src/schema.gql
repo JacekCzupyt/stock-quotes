@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Instrument {
+  instrument_ticker: String!
+  instrument_name: String!
+  quotes: [Quote!]!
+}
+
 type Quote {
   id: Int!
   instrument: Instrument!
@@ -15,12 +21,6 @@ type Quote {
 `Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
 """
 scalar Timestamp
-
-type Instrument {
-  instrument_ticker: String!
-  instrument_name: String!
-  quotes: [Quote!]!
-}
 
 type Query {
   getInstruments: [Instrument!]!
