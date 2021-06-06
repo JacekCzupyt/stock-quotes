@@ -1,9 +1,27 @@
-import { forwardRef } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QuotesModule } from "../quotes/quotes.module";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";
-import { Instrument } from "./models/instrument-query.dto";
+import { InstrumentMutation } from "./models/instrument-mutation.dto";
+import { Instrument } from "./models/instrument.entity";
+
+const instrumentsArray: Instrument[] = [
+  {
+    instrument_ticker: "AAPL",
+    instrument_name: "Apple Inc",
+    quotes: [],
+  },
+  {
+    instrument_ticker: "GOOGL",
+    instrument_name: "Alphabet Inc Class A",
+    quotes: [],
+  },
+];
+
+const instrumentMutation: InstrumentMutation = {
+  instrument_ticker: "TEST",
+  instrument_name: "test-instrument",
+};
 
 describe("InstrumentsResolver", () => {
   let resolver: InstrumentsResolver;
@@ -11,8 +29,21 @@ describe("InstrumentsResolver", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [InstrumentsResolver, InstrumentsService],
-      imports: [forwardRef(() => QuotesModule)],
+      providers: [
+        InstrumentsResolver,
+        {
+          provide: InstrumentsService,
+          useValue: {
+            getAll: jest.fn().mockResolvedValue(instrumentsArray),
+            getOne: jest.fn().mockResolvedValue(instrumentsArray[0]),
+            addNew: jest.fn().mockImplementation(async (arg) => ({
+              instrument_ticker: "TEST",
+              instrument_name: "test-instrument",
+              quotes: Promise.resolve([]),
+            })),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<InstrumentsService>(InstrumentsService);
@@ -25,42 +56,26 @@ describe("InstrumentsResolver", () => {
 
   describe("getInstruments", () => {
     it("should return an array of instruments", async () => {
-      const result: Instrument[] = [
-        {
-          instrument_ticker: "test-ticker",
-          instrument_name: "test-name",
-        },
-      ];
-      jest.spyOn(service, "getAll").mockImplementation(() => result);
-
-      expect(await resolver.getInstruments()).toBe(result);
+      expect(resolver.getInstruments()).resolves.toBe(instrumentsArray);
     });
   });
 
   describe("getInstrument", () => {
     it("should return an instrument", async () => {
-      const result: Instrument = {
-        instrument_ticker: "test-ticker",
-        instrument_name: "test-name",
-      };
-      jest.spyOn(service, "getOne").mockImplementation((input) => ({
-        instrument_ticker: input.instrument_ticker,
-        instrument_name: result.instrument_name,
-      }));
-
       expect(
-        await resolver.getInstrument({
-          instrument_ticker: result.instrument_ticker,
+        resolver.getInstrument({
+          instrument_ticker: "AAPL",
         })
-      ).toEqual(result);
+      ).resolves.toEqual(instrumentsArray[0]);
+      expect(service.getOne).toBeCalledWith({
+        instrument_ticker: "AAPL",
+      });
     });
 
-    // TODO: is error handing nessesary here if it's already in the resolver? If so, how to implement properly?
+    //Not sure if this test is nessesary
 
-    /*it("should throw an error", async () => {
-      expect.assertions(1);
-
-      jest.spyOn(service, "getOne").mockImplementation((input) => {
+    it("should throw an error", async () => {
+      jest.spyOn(service, "getOne").mockImplementation(async (input) => {
         throw new NotFoundException(
           `No instrument with ticker "${input.instrument_ticker}"`
         );
@@ -68,25 +83,43 @@ describe("InstrumentsResolver", () => {
 
       let tick = "ticker";
 
-      await expect(
-        await resolver.getInstrument({ instrument_ticker: tick })
-      ).rejects.toEqual({ error: `No instrument with ticker "${tick}"` });
-    });*/
+      expect(
+        resolver.getInstrument({ instrument_ticker: tick })
+      ).rejects.toThrowError(NotFoundException);
+      expect(
+        resolver.getInstrument({ instrument_ticker: tick })
+      ).rejects.toThrowError(`No instrument with ticker "${tick}"`);
+    });
   });
 
   describe("addInstrument", () => {
     it("should make a new instrument", async () => {
-      jest.spyOn(service, "addNew").mockImplementation((arg) => ({
-        instrument_ticker: arg.instrument_ticker,
-        instrument_name: arg.instrument_name,
-      }));
+      expect(resolver.addInstrument(instrumentMutation)).resolves.toEqual({
+        ...instrumentMutation,
+        quotes: Promise.resolve([]),
+      });
 
-      expect(
-        await resolver.addInstrument({
-          instrument_ticker: "TEST",
-          instrument_name: "test",
-        })
-      ).toEqual({ instrument_ticker: "TEST", instrument_name: "test" });
+      expect(service.addNew).toBeCalledTimes(1);
+      expect(service.addNew).toBeCalledWith(instrumentMutation);
+    });
+
+    //Not sure if this test is nessesary
+
+    it("should throw an error", async () => {
+      const serviceSpy = jest
+        .spyOn(service, "addNew")
+        .mockImplementation(async (input) => {
+          throw new BadRequestException(
+            `No instrument with ticker "${input.instrument_ticker}"`
+          );
+        });
+
+      expect(resolver.addInstrument(instrumentMutation)).rejects.toThrowError(
+        BadRequestException
+      );
+      expect(resolver.addInstrument(instrumentMutation)).rejects.toThrowError(
+        `No instrument with ticker "${instrumentMutation.instrument_ticker}"`
+      );
     });
   });
 });

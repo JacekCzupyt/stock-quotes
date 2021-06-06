@@ -1,10 +1,43 @@
-import { forwardRef } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { InstrumentsModule } from "../instruments/instruments.module";
+import { Instrument } from "src/instruments/models/instrument.entity";
 import { QuoteMutation } from "./models/quote-mutation.dto";
-import { Quote } from "./models/quote-query.dto";
+import { Quote } from "./models/quote.entity";
 import { QuotesResolver } from "./quotes.resolver";
 import { QuotesService } from "./quotes.service";
+
+const quotesArray: Quote[] = [
+  {
+    id: 0,
+    instrument: null,
+    timestamp: new Date(1621620906000),
+    price: 12600,
+  },
+  {
+    id: 1,
+    instrument: null,
+    timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
+    price: 229538,
+  },
+  {
+    id: 2,
+    instrument: null,
+    timestamp: new Date(1621620906000 - 1000 * 3600 * 24),
+    price: 12720,
+  },
+];
+
+let quoteMutation: QuoteMutation = {
+  instrument: "AAPL",
+  timestamp: new Date(100),
+  price: 200,
+};
+
+let mockInstrument: Instrument = {
+  instrument_ticker: "AAPL",
+  instrument_name: "Apple Inc",
+  quotes: [],
+};
 
 describe("QuotesResolver", () => {
   let resolver: QuotesResolver;
@@ -12,9 +45,23 @@ describe("QuotesResolver", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [QuotesResolver, QuotesService],
-      // TODO: verify if this is fine, should it be a new test module?
-      imports: [forwardRef(() => InstrumentsModule)],
+      providers: [
+        QuotesResolver,
+        {
+          provide: QuotesService,
+          useValue: {
+            getAll: jest.fn().mockResolvedValue(quotesArray),
+            getOne: jest.fn().mockResolvedValue(quotesArray[0]),
+            addNew: jest
+              .fn()
+              .mockImplementation(
+                async (quote: QuoteMutation): Promise<Quote> => {
+                  return { ...quote, instrument: mockInstrument, id: 1 };
+                }
+              ),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<QuotesService>(QuotesService);
@@ -27,57 +74,67 @@ describe("QuotesResolver", () => {
 
   describe("getQuotes", () => {
     it("should return an array of quotes", async () => {
-      const result: Quote[] = [
-        {
-          id: 0,
-          instrument: "TEST",
-          timestamp: new Date(100),
-          price: 200,
-        },
-      ];
-      jest.spyOn(service, "getAll").mockImplementation(() => result);
-
-      expect(await resolver.getQuotes()).toBe(result);
+      expect(resolver.getQuotes()).resolves.toBe(quotesArray);
     });
   });
 
   describe("getQuote", () => {
     it("should return a qoute", async () => {
-      const result: Quote = {
-        id: 4,
-        instrument: "TEST",
-        timestamp: new Date(100),
-        price: 200,
-      };
-      jest.spyOn(service, "getOne").mockImplementation((input) => ({
-        id: input.id,
-        instrument: result.instrument,
-        timestamp: result.timestamp,
-        price: result.price,
-      }));
-
       expect(
-        await resolver.getQuote({
-          id: result.id,
+        resolver.getQuote({
+          id: 0,
         })
-      ).toEqual(result);
+      ).resolves.toEqual(quotesArray[0]);
+      expect(service.getOne).toBeCalledWith({
+        id: 0,
+      });
+    });
+
+    //Not sure if this test is nessesary
+
+    it("should throw an error", async () => {
+      jest.spyOn(service, "getOne").mockImplementation(async (input) => {
+        throw new NotFoundException(`No quote with id "${input.id}"`);
+      });
+
+      expect(resolver.getQuote({ id: -1 })).rejects.toThrowError(
+        NotFoundException
+      );
+      expect(resolver.getQuote({ id: -1 })).rejects.toThrowError(
+        `No quote with id "-1"`
+      );
     });
   });
 
   describe("addQuote", () => {
     it("should make a new quote", async () => {
-      let quote: QuoteMutation = {
-        instrument: "TEST",
-        timestamp: new Date(100),
-        price: 200,
-      };
+      expect(resolver.addQuote(quoteMutation)).resolves.toEqual({
+        ...quoteMutation,
+        id: 1,
+        instrument: mockInstrument,
+      });
 
-      jest.spyOn(service, "addNew").mockImplementation((arg) => ({
-        id: 10,
-        ...arg,
-      }));
+      expect(service.addNew).toBeCalledTimes(1);
+      expect(service.addNew).toBeCalledWith(quoteMutation);
+    });
 
-      expect(await resolver.addQuote(quote)).toEqual({ id: 10, ...quote });
+    //Not sure if this test is nessesary
+
+    it("should throw an error", async () => {
+      const serviceSpy = jest
+        .spyOn(service, "addNew")
+        .mockImplementation(async (input) => {
+          throw new BadRequestException(
+            `No instrument with ticker "${input.instrument}"`
+          );
+        });
+
+      expect(resolver.addQuote(quoteMutation)).rejects.toThrowError(
+        BadRequestException
+      );
+      expect(resolver.addQuote(quoteMutation)).rejects.toThrowError(
+        `No instrument with ticker "${quoteMutation.instrument}"`
+      );
     });
   });
 });

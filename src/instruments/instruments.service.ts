@@ -2,50 +2,55 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  NotImplementedException,
 } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 import { InstrumentInput } from "./models/instrument-input.dto";
 import { InstrumentMutation } from "./models/instrument-mutation.dto";
-import { Instrument } from "./models/instrument-query.dto";
+import { Instrument } from "./models/instrument.entity";
 
 @Injectable()
 export class InstrumentsService {
-  private instruments: Instrument[] = [
-    {
-      instrument_ticker: "AAPL",
-      instrument_name: "Apple Inc",
-    },
-    {
-      instrument_ticker: "GOOGL",
-      instrument_name: "Alphabet Inc Class A",
-    },
-  ];
+  constructor(
+    @InjectRepository(Instrument)
+    private instrumentsRepository: Repository<Instrument>
+  ) {}
 
-  getAll(): Instrument[] {
-    return this.instruments;
+  async getAll(): Promise<Instrument[]> {
+    return this.instrumentsRepository.find();
   }
 
-  getOne(input_instrument: InstrumentInput): Instrument {
-    const found_instrument = this.instruments.find(
-      (inst) => inst.instrument_ticker === input_instrument.instrument_ticker
-    );
-    if (!found_instrument) {
-      throw new NotFoundException(
-        `No instrument with ticker "${input_instrument.instrument_ticker}"`
+  async getOne(input_instrument: InstrumentInput): Promise<Instrument> {
+    try {
+      return await this.instrumentsRepository.findOneOrFail(
+        input_instrument.instrument_ticker
       );
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        throw new NotFoundException(
+          `No instrument with ticker "${input_instrument.instrument_ticker}"`
+        );
+      } else {
+        throw e;
+      }
     }
-    return found_instrument;
   }
 
-  addNew(instrument: InstrumentMutation): Instrument {
-    const found_instrument = this.instruments.find(
-      (inst) => inst.instrument_ticker === instrument.instrument_ticker
-    );
-    if (found_instrument) {
-      throw new BadRequestException(
-        `Instrument with ticker "${instrument.instrument_ticker}" already exists`
+  async addNew(instrument: InstrumentMutation): Promise<Instrument> {
+    //check if instrument with this ticker already exists
+    try {
+      await this.instrumentsRepository.findOneOrFail(
+        instrument.instrument_ticker
       );
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        return this.instrumentsRepository.save({ ...instrument });
+      } else {
+        throw e;
+      }
     }
-    return this.instruments[this.instruments.push({ ...instrument }) - 1];
+    throw new BadRequestException(
+      `Instrument with ticker "${instrument.instrument_ticker}" already exists`
+    );
   }
 }

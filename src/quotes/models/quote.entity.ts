@@ -1,15 +1,22 @@
 import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { Instrument } from "../../instruments/models/instrument-query.dto";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Instrument } from "../../instruments/models/instrument.entity";
 
 @ObjectType()
+@Entity()
 export class Quote {
   @Field((type) => Int)
+  @PrimaryGeneratedColumn()
   id: number;
 
+  @ManyToOne((type) => Instrument, (instrument) => instrument.quotes, {
+    lazy: true,
+  })
   @Field((type) => Instrument)
-  instrument: string;
+  instrument: Instrument;
 
   @Field()
+  @Column()
   timestamp: Date;
 
   /*
@@ -23,5 +30,6 @@ export class Quote {
   that Int can already support long intigers depanding on the context.
   */
   @Field((type) => Int, { description: "Price in cents" })
+  @Column()
   price: number;
 }
