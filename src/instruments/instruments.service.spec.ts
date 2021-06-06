@@ -1,7 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-import { resolve } from "path";
 import { EntityNotFoundError, Repository } from "typeorm";
 import { InstrumentsService } from "./instruments.service";
 import { Instrument } from "./models/instrument.entity";

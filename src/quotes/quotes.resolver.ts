@@ -1,14 +1,4 @@
-import { forwardRef, Inject, NotImplementedException } from "@nestjs/common";
-import {
-  Args,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from "@nestjs/graphql";
-import { InstrumentsService } from "../instruments/instruments.service";
-import { Instrument } from "../instruments/models/instrument.entity";
+import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote.entity";

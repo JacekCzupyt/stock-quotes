@@ -1,7 +1,5 @@
-import { forwardRef, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { InstrumentInput } from "../instruments/models/instrument-input.dto";
-import { InstrumentsModule } from "../instruments/instruments.module";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { QuotesService } from "./quotes.service";
 import { getRepositoryToken } from "@nestjs/typeorm";

@@ -1,11 +1,5 @@
-import { inputFieldToFieldConfig } from "@graphql-tools/utils";
-import {
-  BadRequestException,
-  forwardRef,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QuotesModule } from "../quotes/quotes.module";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";
 import { InstrumentMutation } from "./models/instrument-mutation.dto";

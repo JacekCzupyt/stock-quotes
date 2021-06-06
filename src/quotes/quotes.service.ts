@@ -1,17 +1,10 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-  NotImplementedException,
-} from "@nestjs/common";
-import { InstrumentInput } from "../instruments/models/instrument-input.dto";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InstrumentsService } from "../instruments/instruments.service";
 import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Not, Repository } from "typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 
 @Injectable()
 export class QuotesService {

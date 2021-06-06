@@ -1,11 +1,6 @@
-import {
-  BadRequestException,
-  forwardRef,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { Instrument } from "src/instruments/models/instrument.entity";
-import { InstrumentsModule } from "../instruments/instruments.module";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote.entity";
 import { QuotesResolver } from "./quotes.resolver";
