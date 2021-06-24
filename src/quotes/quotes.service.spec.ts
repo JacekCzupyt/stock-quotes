@@ -1,6 +1,6 @@
 import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QuoteMutation } from "./models/quote-mutation.dto";
+import { QuoteInput } from "./models/quote-input.dto";
 import { QuotesService } from "./quotes.service";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Quote } from "./models/quote.entity";
@@ -29,7 +29,7 @@ const quotesArray: Quote[] = [
   },
 ];
 
-let quoteMutation: QuoteMutation = {
+let quoteMutation: QuoteInput = {
   instrument: "AAPL",
   timestamp: new Date(100),
   price: 200,

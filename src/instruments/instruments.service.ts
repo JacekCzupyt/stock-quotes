@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EntityNotFoundError, Repository } from "typeorm";
-import { InstrumentMutation } from "./models/instrument-mutation.dto";
+import { InstrumentInput } from "./models/instrument-input.dto";
 import { Instrument } from "./models/instrument.entity";
 
 @Injectable()
@@ -33,7 +33,7 @@ export class InstrumentsService {
     }
   }
 
-  async addNew(instrument: InstrumentMutation): Promise<Instrument> {
+  async addNew(instrument: InstrumentInput): Promise<Instrument> {
     //check if instrument with this ticker already exists
 
     const existingInstrument = await this.instrumentsRepository.findOne(

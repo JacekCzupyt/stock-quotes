@@ -2,7 +2,7 @@ import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { InstrumentsResolver } from "./instruments.resolver";
 import { InstrumentsService } from "./instruments.service";
-import { InstrumentMutation } from "./models/instrument-mutation.dto";
+import { InstrumentInput } from "./models/instrument-input.dto";
 import { Instrument } from "./models/instrument.entity";
 
 const instrumentsArray: Instrument[] = [
@@ -18,7 +18,7 @@ const instrumentsArray: Instrument[] = [
   },
 ];
 
-const instrumentMutation: InstrumentMutation = {
+const instrumentMutation: InstrumentInput = {
   instrumentTicker: "TEST",
   instrumentName: "test-instrument",
 };

@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { Instrument } from "src/instruments/models/instrument.entity";
-import { QuoteMutation } from "./models/quote-mutation.dto";
+import { QuoteInput } from "./models/quote-input.dto";
 import { Quote } from "./models/quote.entity";
 import { QuotesResolver } from "./quotes.resolver";
 import { QuotesService } from "./quotes.service";
@@ -27,7 +27,7 @@ const quotesArray: Quote[] = [
   },
 ];
 
-let quoteMutation: QuoteMutation = {
+let quoteMutation: QuoteInput = {
   instrument: "AAPL",
   timestamp: new Date(100),
   price: 200,
@@ -54,11 +54,9 @@ describe("QuotesResolver", () => {
             getOne: jest.fn().mockResolvedValue(quotesArray[0]),
             addNew: jest
               .fn()
-              .mockImplementation(
-                async (quote: QuoteMutation): Promise<Quote> => {
-                  return { ...quote, instrument: mockInstrument, id: 1 };
-                }
-              ),
+              .mockImplementation(async (quote: QuoteInput): Promise<Quote> => {
+                return { ...quote, instrument: mockInstrument, id: 1 };
+              }),
           },
         },
       ],

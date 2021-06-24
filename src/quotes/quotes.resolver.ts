@@ -1,5 +1,5 @@
 import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { QuoteMutation } from "./models/quote-mutation.dto";
+import { QuoteInput } from "./models/quote-input.dto";
 import { Quote } from "./models/quote.entity";
 import { QuotesService } from "./quotes.service";
 
@@ -21,7 +21,7 @@ export class QuotesResolver {
   }
 
   @Mutation(() => Quote)
-  async addQuote(@Args("newQuote") newQuote: QuoteMutation): Promise<Quote> {
+  async addQuote(@Args("newQuote") newQuote: QuoteInput): Promise<Quote> {
     return this.quotesService.addNew(newQuote);
   }
 }
