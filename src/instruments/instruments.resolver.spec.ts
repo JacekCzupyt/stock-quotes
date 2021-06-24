@@ -7,20 +7,20 @@ import { Instrument } from "./models/instrument.entity";
 
 const instrumentsArray: Instrument[] = [
   {
-    instrument_ticker: "AAPL",
-    instrument_name: "Apple Inc",
+    instrumentTicker: "AAPL",
+    instrumentName: "Apple Inc",
     quotes: [],
   },
   {
-    instrument_ticker: "GOOGL",
-    instrument_name: "Alphabet Inc Class A",
+    instrumentTicker: "GOOGL",
+    instrumentName: "Alphabet Inc Class A",
     quotes: [],
   },
 ];
 
 const instrumentMutation: InstrumentMutation = {
-  instrument_ticker: "TEST",
-  instrument_name: "test-instrument",
+  instrumentTicker: "TEST",
+  instrumentName: "test-instrument",
 };
 
 describe("InstrumentsResolver", () => {
@@ -62,33 +62,31 @@ describe("InstrumentsResolver", () => {
 
   describe("getInstrument", () => {
     it("should return an instrument", async () => {
-      expect(
-        resolver.getInstrument({
-          instrument_ticker: "AAPL",
-        })
-      ).resolves.toEqual(instrumentsArray[0]);
-      expect(service.getOne).toBeCalledWith({
-        instrument_ticker: "AAPL",
-      });
+      expect(resolver.getInstrument("AAPL")).resolves.toEqual(
+        instrumentsArray[0]
+      );
+      expect(service.getOne).toBeCalledWith("AAPL");
     });
 
     //Not sure if this test is nessesary
 
     it("should throw an error", async () => {
-      jest.spyOn(service, "getOne").mockImplementation(async (input) => {
-        throw new NotFoundException(
-          `No instrument with ticker "${input.instrument_ticker}"`
-        );
-      });
+      jest
+        .spyOn(service, "getOne")
+        .mockImplementation(async (instrument_ticker) => {
+          throw new NotFoundException(
+            `No instrument with ticker "${instrument_ticker}"`
+          );
+        });
 
       let tick = "ticker";
 
-      expect(
-        resolver.getInstrument({ instrument_ticker: tick })
-      ).rejects.toThrowError(NotFoundException);
-      expect(
-        resolver.getInstrument({ instrument_ticker: tick })
-      ).rejects.toThrowError(`No instrument with ticker "${tick}"`);
+      expect(resolver.getInstrument(tick)).rejects.toThrowError(
+        NotFoundException
+      );
+      expect(resolver.getInstrument(tick)).rejects.toThrowError(
+        `No instrument with ticker "${tick}"`
+      );
     });
   });
 
@@ -110,7 +108,7 @@ describe("InstrumentsResolver", () => {
         .spyOn(service, "addNew")
         .mockImplementation(async (input) => {
           throw new BadRequestException(
-            `No instrument with ticker "${input.instrument_ticker}"`
+            `No instrument with ticker "${input.instrumentTicker}"`
           );
         });
 
@@ -118,7 +116,7 @@ describe("InstrumentsResolver", () => {
         BadRequestException
       );
       expect(resolver.addInstrument(instrumentMutation)).rejects.toThrowError(
-        `No instrument with ticker "${instrumentMutation.instrument_ticker}"`
+        `No instrument with ticker "${instrumentMutation.instrumentTicker}"`
       );
     });
   });

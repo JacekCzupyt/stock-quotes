@@ -1,6 +1,5 @@
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { InstrumentsService } from "./instruments.service";
-import { InstrumentInput } from "./models/instrument-input.dto";
 import { InstrumentMutation } from "./models/instrument-mutation.dto";
 import { Instrument } from "./models/instrument.entity";
 
@@ -16,9 +15,9 @@ export class InstrumentsResolver {
   @Query(() => Instrument)
   async getInstrument(
     @Args("instrumentTicker")
-    input_instrument: InstrumentInput
+    instrumentTicker: string
   ): Promise<Instrument> {
-    return this.instrumentsService.getOne(input_instrument);
+    return this.instrumentsService.getOne(instrumentTicker);
   }
 
   @Mutation(() => Instrument)

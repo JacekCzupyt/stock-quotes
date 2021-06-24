@@ -7,11 +7,11 @@ import { Quote } from "../../quotes/models/quote.entity";
 export class Instrument {
   @Field()
   @PrimaryColumn()
-  instrument_ticker: string;
+  instrumentTicker: string;
 
   @Field()
   @Column()
-  instrument_name: string;
+  instrumentName: string;
 
   @Field(() => [Quote])
   @OneToMany((type) => Quote, (quote) => quote.instrument, {

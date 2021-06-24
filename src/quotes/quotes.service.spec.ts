@@ -36,8 +36,8 @@ let quoteMutation: QuoteMutation = {
 };
 
 let mockInstrument: Instrument = {
-  instrument_ticker: "AAPL",
-  instrument_name: "Apple Inc",
+  instrumentTicker: "AAPL",
+  instrumentName: "Apple Inc",
   quotes: [],
 };
 
@@ -91,7 +91,7 @@ describe("QuotesService", () => {
 
   describe("getQuote", () => {
     it("should return a qoute", () => {
-      expect(service.getOne({ id: 1 })).resolves.toEqual(quotesArray[0]);
+      expect(service.getOne(1)).resolves.toEqual(quotesArray[0]);
       expect(repo.findOneOrFail).toBeCalledWith(1);
     });
     it("should throw an error", () => {
@@ -101,7 +101,7 @@ describe("QuotesService", () => {
           throw new EntityNotFoundError(Quote, id);
         });
 
-      const call = () => service.getOne({ id: -1 });
+      const call = () => service.getOne(-1);
       expect(call()).rejects.toThrowError(NotFoundException);
       expect(call()).rejects.toThrowError('No quote with id "-1"');
 
@@ -119,9 +119,7 @@ describe("QuotesService", () => {
       });
 
       expect(instrumentService.getOne).toBeCalledTimes(1);
-      expect(instrumentService.getOne).toBeCalledWith({
-        instrument_ticker: quoteMutation.instrument,
-      });
+      expect(instrumentService.getOne).toBeCalledWith(quoteMutation.instrument);
 
       expect(repo.create).toBeCalledTimes(1);
       expect(repo.create).toBeCalledWith({

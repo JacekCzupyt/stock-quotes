@@ -24,17 +24,9 @@ type Instrument {
 
 type Query {
   getInstruments: [Instrument!]!
-  getInstrument(instrumentTicker: InstrumentInput!): Instrument!
+  getInstrument(instrumentTicker: String!): Instrument!
   getQuotes: [Quote!]!
-  getQuote(quoteInput: QuoteInput!): Quote!
-}
-
-input InstrumentInput {
-  instrument_ticker: String!
-}
-
-input QuoteInput {
-  id: Int!
+  getQuote(id: Int!): Quote!
 }
 
 type Mutation {

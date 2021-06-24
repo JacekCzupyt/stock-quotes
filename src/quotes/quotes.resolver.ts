@@ -1,5 +1,4 @@
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { QuoteInput } from "./models/quote-input.dto";
+import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote.entity";
 import { QuotesService } from "./quotes.service";
@@ -15,14 +14,14 @@ export class QuotesResolver {
 
   @Query(() => Quote)
   async getQuote(
-    @Args("quoteInput")
-    quote_input: QuoteInput
+    @Args("id", { type: () => Int })
+    quoteId: number
   ): Promise<Quote> {
-    return this.quotesService.getOne(quote_input);
+    return this.quotesService.getOne(quoteId);
   }
 
   @Mutation(() => Quote)
-  async addQuote(@Args("newQuote") new_Quote: QuoteMutation): Promise<Quote> {
-    return this.quotesService.addNew(new_Quote);
+  async addQuote(@Args("newQuote") newQuote: QuoteMutation): Promise<Quote> {
+    return this.quotesService.addNew(newQuote);
   }
 }

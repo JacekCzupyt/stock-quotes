@@ -34,8 +34,8 @@ let quoteMutation: QuoteMutation = {
 };
 
 let mockInstrument: Instrument = {
-  instrument_ticker: "AAPL",
-  instrument_name: "Apple Inc",
+  instrumentTicker: "AAPL",
+  instrumentName: "Apple Inc",
   quotes: [],
 };
 
@@ -80,27 +80,19 @@ describe("QuotesResolver", () => {
 
   describe("getQuote", () => {
     it("should return a qoute", async () => {
-      expect(
-        resolver.getQuote({
-          id: 0,
-        })
-      ).resolves.toEqual(quotesArray[0]);
-      expect(service.getOne).toBeCalledWith({
-        id: 0,
-      });
+      expect(resolver.getQuote(0)).resolves.toEqual(quotesArray[0]);
+      expect(service.getOne).toBeCalledWith(0);
     });
 
     //Not sure if this test is nessesary
 
     it("should throw an error", async () => {
-      jest.spyOn(service, "getOne").mockImplementation(async (input) => {
-        throw new NotFoundException(`No quote with id "${input.id}"`);
+      jest.spyOn(service, "getOne").mockImplementation(async (id) => {
+        throw new NotFoundException(`No quote with id "${id}"`);
       });
 
-      expect(resolver.getQuote({ id: -1 })).rejects.toThrowError(
-        NotFoundException
-      );
-      expect(resolver.getQuote({ id: -1 })).rejects.toThrowError(
+      expect(resolver.getQuote(-1)).rejects.toThrowError(NotFoundException);
+      expect(resolver.getQuote(-1)).rejects.toThrowError(
         `No quote with id "-1"`
       );
     });

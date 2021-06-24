@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InstrumentsService } from "../instruments/instruments.service";
-import { QuoteInput } from "./models/quote-input.dto";
 import { QuoteMutation } from "./models/quote-mutation.dto";
 import { Quote } from "./models/quote.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -20,12 +19,12 @@ export class QuotesService {
     return this.quotesRepository.find();
   }
 
-  async getOne(quoteInput: QuoteInput): Promise<Quote> {
+  async getOne(quoteId: number): Promise<Quote> {
     try {
-      return await this.quotesRepository.findOneOrFail(quoteInput.id);
+      return await this.quotesRepository.findOneOrFail(quoteId);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
-        throw new NotFoundException(`No quote with id "${quoteInput.id}"`);
+        throw new NotFoundException(`No quote with id "${quoteId}"`);
       } else {
         throw e;
       }
@@ -35,9 +34,7 @@ export class QuotesService {
   async addNew(quote: QuoteMutation): Promise<Quote> {
     //throws error if no instrument with provided ticker is present
     return this.instrumentsService
-      .getOne({
-        instrument_ticker: quote.instrument,
-      })
+      .getOne(quote.instrument)
       .then((inst) =>
         this.quotesRepository.save(
           this.quotesRepository.create({ ...quote, instrument: inst })
