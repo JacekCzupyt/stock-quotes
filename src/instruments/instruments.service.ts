@@ -38,19 +38,15 @@ export class InstrumentsService {
 
   async addNew(instrument: InstrumentMutation): Promise<Instrument> {
     //check if instrument with this ticker already exists
-    try {
-      await this.instrumentsRepository.findOneOrFail(
-        instrument.instrument_ticker
-      );
-    } catch (e) {
-      if (e instanceof EntityNotFoundError) {
-        return this.instrumentsRepository.save({ ...instrument });
-      } else {
-        throw e;
-      }
+
+    const existingInstrument = await this.instrumentsRepository.findOne(
+      instrument.instrument_ticker
+    )
+    if(existingInstrument){
+      throw new BadRequestException(
+        `Instrument with ticker "${instrument.instrument_ticker}" already exists`
+      )
     }
-    throw new BadRequestException(
-      `Instrument with ticker "${instrument.instrument_ticker}" already exists`
-    );
+    return this.instrumentsRepository.save({ ...instrument });
   }
 }

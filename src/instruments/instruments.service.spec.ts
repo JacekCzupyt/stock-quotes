@@ -31,6 +31,7 @@ describe("InstrumentsService", () => {
           useValue: {
             find: jest.fn().mockResolvedValue(instrumentsArray),
             findOneOrFail: jest.fn().mockResolvedValue(instrumentsArray[0]),
+            findOne: jest.fn().mockResolvedValue(instrumentsArray[0]),
             save: jest
               .fn()
               .mockImplementation(async (inst): Promise<Instrument> => {
@@ -84,10 +85,8 @@ describe("InstrumentsService", () => {
   describe("addInstrument", () => {
     it("should add an instruemnt to the array", () => {
       const repoSpy = jest
-        .spyOn(repo, "findOneOrFail")
-        .mockImplementation((id) => {
-          throw new EntityNotFoundError(Instrument, id);
-        });
+        .spyOn(repo, "findOne")
+        .mockImplementation((e) => {return Promise.resolve(null)})
 
       expect(
         service.addNew({
@@ -100,14 +99,19 @@ describe("InstrumentsService", () => {
         quotes: Promise.resolve([]),
       });
 
+      expect(repo.findOne).toBeCalledTimes(1);
+      expect(repo.findOne).toBeCalledWith("TEST");
+      
+      //TODO: figure out why this fails
+      //For some reason jest states that repo.save is never called
+      //I've sepnt 3 hours trying to fix it now, the debugger sees it triggered,
+      //it returns the correct result, all other tests work, things that depend
+      //on repo.save work, I don't understand why it fails.
       expect(repo.save).toBeCalledTimes(1);
       expect(repo.save).toBeCalledWith({
         instrument_ticker: "TEST",
         instrument_name: "test-instrument",
       });
-
-      expect(repo.findOneOrFail).toBeCalledTimes(1);
-      expect(repo.findOneOrFail).toBeCalledWith("TEST");
     });
 
     it("should throw an error", () => {
@@ -121,8 +125,8 @@ describe("InstrumentsService", () => {
         'Instrument with ticker "AAPL" already exists'
       );
 
-      expect(repo.findOneOrFail).toBeCalledTimes(2);
-      expect(repo.findOneOrFail).toBeCalledWith("AAPL");
+      expect(repo.findOne).toBeCalledTimes(2);
+      expect(repo.findOne).toBeCalledWith("AAPL");
       expect(repo.save).toBeCalledTimes(0);
     });
   });
