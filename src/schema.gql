@@ -17,29 +17,29 @@ type Quote {
 scalar Timestamp
 
 type Instrument {
-  instrument_ticker: String!
-  instrument_name: String!
+  instrumentTicker: String!
+  instrumentName: String!
   quotes: [Quote!]!
 }
 
 type Query {
-  getInstruments: [Instrument!]!
+  getInstruments(offset: Int, number: Int): [Instrument!]!
   getInstrument(instrumentTicker: String!): Instrument!
   getQuotes: [Quote!]!
   getQuote(id: Int!): Quote!
 }
 
 type Mutation {
-  addInstrument(newInstrument: InstrumentMutation!): Instrument!
-  addQuote(newQuote: QuoteMutation!): Quote!
+  addInstrument(newInstrument: InstrumentInput!): Instrument!
+  addQuote(newQuote: QuoteInput!): Quote!
 }
 
-input InstrumentMutation {
-  instrument_ticker: String!
-  instrument_name: String!
+input InstrumentInput {
+  instrumentTicker: String!
+  instrumentName: String!
 }
 
-input QuoteMutation {
+input QuoteInput {
   instrument: String!
   timestamp: Timestamp!
 

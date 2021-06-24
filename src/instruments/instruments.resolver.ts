@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { InstrumentsService } from "./instruments.service";
 import { InstrumentInput } from "./models/instrument-input.dto";
 import { Instrument } from "./models/instrument.entity";
@@ -8,8 +8,13 @@ export class InstrumentsResolver {
   constructor(private instrumentsService: InstrumentsService) {}
 
   @Query(() => [Instrument])
-  async getInstruments(): Promise<Instrument[]> {
-    return this.instrumentsService.getAll();
+  async getInstruments(
+    @Args("number", { type: () => Int, nullable: true })
+    num?: number,
+    @Args("offset", { type: () => Int, nullable: true })
+    offset?: number
+  ): Promise<Instrument[]> {
+    return this.instrumentsService.getAll(num, offset);
   }
 
   @Query(() => Instrument)

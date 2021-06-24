@@ -15,8 +15,14 @@ export class InstrumentsService {
     private instrumentsRepository: Repository<Instrument>
   ) {}
 
-  async getAll(): Promise<Instrument[]> {
-    return this.instrumentsRepository.find();
+  async getAll(num?: number, offset?: number): Promise<Instrument[]> {
+    //DefalutPageSize can be swapped for some default value if we want pagiantion by default
+    const DefalutPageSize = undefined;
+
+    return this.instrumentsRepository.find({
+      take: num ?? DefalutPageSize,
+      skip: offset ?? 0,
+    });
   }
 
   async getOne(instrumentTicker: string): Promise<Instrument> {
