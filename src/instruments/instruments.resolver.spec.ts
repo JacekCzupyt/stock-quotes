@@ -37,8 +37,8 @@ describe("InstrumentsResolver", () => {
             getAll: jest.fn().mockResolvedValue(instrumentsArray),
             getOne: jest.fn().mockResolvedValue(instrumentsArray[0]),
             addNew: jest.fn().mockImplementation(async (arg) => ({
-              instrument_ticker: "TEST",
-              instrument_name: "test-instrument",
+              instrumentTicker: "TEST",
+              instrumentName: "test-instrument",
               quotes: Promise.resolve([]),
             })),
           },

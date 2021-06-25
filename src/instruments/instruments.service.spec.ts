@@ -81,7 +81,7 @@ describe("InstrumentsService", () => {
 
   describe("addInstrument", () => {
     it("should add an instruemnt to the array", () => {
-      const repoSpy = jest.spyOn(repo, "findOne").mockImplementation((e) => {
+      const repoSpy = jest.spyOn(repo, "findOne").mockImplementation(async (e) => {
         return Promise.resolve(null);
       });
 
