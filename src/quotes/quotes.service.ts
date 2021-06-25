@@ -39,12 +39,9 @@ export class QuotesService {
 
   async addNew(quote: QuoteInput): Promise<Quote> {
     //throws error if no instrument with provided ticker is present
-    return this.instrumentsService
-      .getOne(quote.instrument)
-      .then((inst) =>
-        this.quotesRepository.save(
-          this.quotesRepository.create({ ...quote, instrument: inst })
-        )
-      );
+    let inst = await this.instrumentsService.getOne(quote.instrument);
+    return await this.quotesRepository.save(
+      this.quotesRepository.create({ ...quote, instrument: inst })
+    );
   }
 }
