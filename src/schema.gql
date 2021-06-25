@@ -25,7 +25,7 @@ type Instrument {
 type Query {
   getInstruments(offset: Int, number: Int): [Instrument!]!
   getInstrument(instrumentTicker: String!): Instrument!
-  getQuotes: [Quote!]!
+  getQuotes(offset: Int, number: Int): [Quote!]!
   getQuote(id: Int!): Quote!
 }
 

@@ -7,6 +7,7 @@ import { Instrument } from "./models/instrument.entity";
 export class InstrumentsResolver {
   constructor(private instrumentsService: InstrumentsService) {}
 
+  //TODO: add filters?
   @Query(() => [Instrument])
   async getInstruments(
     @Args("number", { type: () => Int, nullable: true })

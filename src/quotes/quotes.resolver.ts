@@ -7,9 +7,15 @@ import { QuotesService } from "./quotes.service";
 export class QuotesResolver {
   constructor(private readonly quotesService: QuotesService) {}
 
+  //TODO: add filters?
   @Query(() => [Quote])
-  async getQuotes(): Promise<Quote[]> {
-    return this.quotesService.getAll();
+  async getQuotes(
+    @Args("number", { type: () => Int, nullable: true })
+    num?: number,
+    @Args("offset", { type: () => Int, nullable: true })
+    offset?: number
+  ): Promise<Quote[]> {
+    return this.quotesService.getAll(num, offset);
   }
 
   @Query(() => Quote)

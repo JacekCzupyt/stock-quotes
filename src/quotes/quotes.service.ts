@@ -15,8 +15,14 @@ export class QuotesService {
 
   //private quotes: Quote[] = QuotesService.defaultArrayState();
 
-  async getAll(): Promise<Quote[]> {
-    return this.quotesRepository.find();
+  async getAll(num?: number, offset?: number): Promise<Quote[]> {
+    //DefalutPageSize can be swapped for some default value if we want pagiantion by default
+    const DefalutPageSize = undefined;
+
+    return this.quotesRepository.find({
+      take: num ?? DefalutPageSize,
+      skip: offset ?? 0
+    });
   }
 
   async getOne(quoteId: number): Promise<Quote> {
