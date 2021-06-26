@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { EntityNotFoundError, QueryFailedError, Repository } from "typeorm";
 import { InstrumentInput } from "./models/instrument-input.dto";
 import { Instrument } from "./models/instrument.entity";
 
@@ -40,20 +40,25 @@ export class InstrumentsService {
   }
 
   async addNew(instrumentInput: InstrumentInput): Promise<Instrument> {
-    //check if instrument with this ticker already exists
-    const existingInstrument = await this.instrumentsRepository.findOne(
-      instrumentInput.instrumentTicker
-    );
-    if (existingInstrument) {
-      throw new BadRequestException(
-        `Instrument with ticker "${instrumentInput.instrumentTicker}" already exists`
+    try {
+      //transactions are enabled by default for the insert operation, therfore a duplicate instrument
+      //will never be inserted because of concurent requests, instead an QueryFailedError will be thrown
+      let result = await this.instrumentsRepository.insert({
+        ...instrumentInput,
+        instrumentName:
+          instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
+      });
+      return await this.instrumentsRepository.findOne(
+        instrumentInput.instrumentTicker
       );
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        throw new BadRequestException(
+          `Instrument with ticker "${instrumentInput.instrumentTicker}" already exists`
+        );
+      } else {
+        throw e;
+      }
     }
-    //if no instrument name is provided, it will default to be the same as the ticker
-    return this.instrumentsRepository.save({
-      ...instrumentInput,
-      instrumentName:
-        instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
-    });
   }
 }

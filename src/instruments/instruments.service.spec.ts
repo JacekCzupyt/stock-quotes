@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { EntityNotFoundError, QueryFailedError, Repository } from "typeorm";
 import { InstrumentsService } from "./instruments.service";
 import { Instrument } from "./models/instrument.entity";
 
@@ -32,11 +32,7 @@ describe("InstrumentsService", () => {
             find: jest.fn().mockResolvedValue(instrumentsArray),
             findOneOrFail: jest.fn().mockResolvedValue(instrumentsArray[0]),
             findOne: jest.fn().mockResolvedValue(instrumentsArray[0]),
-            save: jest
-              .fn()
-              .mockImplementation(async (inst): Promise<Instrument> => {
-                return { ...inst, quotes: Promise.resolve([]) };
-              }),
+            insert: jest.fn().mockImplementation(async (inst) => null),
           },
         },
       ],
@@ -83,39 +79,33 @@ describe("InstrumentsService", () => {
 
   describe("addInstrument", () => {
     it("should add an instruemnt", async () => {
-      const repoSpy = jest
-        .spyOn(repo, "findOne")
-        .mockImplementation(async (e) => {
-          return Promise.resolve(null);
-        });
-
       await expect(
         service.addNew({
-          instrumentTicker: "TEST",
-          instrumentName: "test-instrument",
+          instrumentTicker: "AAPL",
+          instrumentName: "Apple Inc",
         })
       ).resolves.toEqual({
-        instrumentTicker: "TEST",
-        instrumentName: "test-instrument",
-        quotes: Promise.resolve([]),
+        instrumentTicker: "AAPL",
+        instrumentName: "Apple Inc",
+        quotes: [],
+      });
+
+      expect(repo.insert).toBeCalledTimes(1);
+      expect(repo.insert).toBeCalledWith({
+        instrumentTicker: "AAPL",
+        instrumentName: "Apple Inc",
       });
 
       expect(repo.findOne).toBeCalledTimes(1);
-      expect(repo.findOne).toBeCalledWith("TEST");
-
-      expect(repo.save).toBeCalledTimes(1);
-      expect(repo.save).toBeCalledWith({
-        instrumentTicker: "TEST",
-        instrumentName: "test-instrument",
-      });
+      expect(repo.findOne).toBeCalledWith("AAPL");
     });
 
     it("should add an instruemnt with default name", async () => {
-      const repoSpy = jest
-        .spyOn(repo, "findOne")
-        .mockImplementation(async (e) => {
-          return Promise.resolve(null);
-        });
+      const findOneSpy = jest.spyOn(repo, "findOne").mockResolvedValue({
+        instrumentTicker: "TEST",
+        instrumentName: "TEST",
+        quotes: [],
+      });
 
       await expect(
         service.addNew({
@@ -124,20 +114,24 @@ describe("InstrumentsService", () => {
       ).resolves.toEqual({
         instrumentTicker: "TEST",
         instrumentName: "TEST",
-        quotes: Promise.resolve([]),
+        quotes: [],
+      });
+
+      expect(repo.insert).toBeCalledTimes(1);
+      expect(repo.insert).toBeCalledWith({
+        instrumentTicker: "TEST",
+        instrumentName: "TEST",
       });
 
       expect(repo.findOne).toBeCalledTimes(1);
       expect(repo.findOne).toBeCalledWith("TEST");
-
-      expect(repo.save).toBeCalledTimes(1);
-      expect(repo.save).toBeCalledWith({
-        instrumentTicker: "TEST",
-        instrumentName: "TEST",
-      });
     });
 
     it("should throw an error", async () => {
+      const insertSpy = jest
+        .spyOn(repo, "insert")
+        .mockRejectedValue(new QueryFailedError("", [], ""));
+
       const call = () =>
         service.addNew({
           instrumentTicker: "AAPL",
@@ -148,9 +142,12 @@ describe("InstrumentsService", () => {
         'Instrument with ticker "AAPL" already exists'
       );
 
-      expect(repo.findOne).toBeCalledTimes(2);
-      expect(repo.findOne).toBeCalledWith("AAPL");
-      expect(repo.save).toBeCalledTimes(0);
+      expect(repo.insert).toBeCalledTimes(2);
+      expect(repo.insert).toBeCalledWith({
+        instrumentTicker: "AAPL",
+        instrumentName: "instrument with duplicate id",
+      });
+      expect(repo.findOne).toBeCalledTimes(0);
     });
   });
 });
