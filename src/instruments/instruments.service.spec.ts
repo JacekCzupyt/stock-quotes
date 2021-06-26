@@ -80,10 +80,12 @@ describe("InstrumentsService", () => {
   });
 
   describe("addInstrument", () => {
-    it("should add an instruemnt to the array", () => {
-      const repoSpy = jest.spyOn(repo, "findOne").mockImplementation(async (e) => {
-        return Promise.resolve(null);
-      });
+    it("should add an instruemnt", () => {
+      const repoSpy = jest
+        .spyOn(repo, "findOne")
+        .mockImplementation(async (e) => {
+          return Promise.resolve(null);
+        });
 
       expect(
         service.addNew({
@@ -108,6 +110,35 @@ describe("InstrumentsService", () => {
       expect(repo.save).toBeCalledWith({
         instrumentTicker: "TEST",
         instrumentName: "test-instrument",
+      });
+    });
+
+    it("should add an instruemnt with default name", () => {
+      const repoSpy = jest
+        .spyOn(repo, "findOne")
+        .mockImplementation(async (e) => {
+          return Promise.resolve(null);
+        });
+
+      expect(
+        service.addNew({
+          instrumentTicker: "TEST",
+        })
+      ).resolves.toEqual({
+        instrumentTicker: "TEST",
+        instrumentName: "TEST",
+        quotes: Promise.resolve([]),
+      });
+
+      expect(repo.findOne).toBeCalledTimes(1);
+      expect(repo.findOne).toBeCalledWith("TEST");
+
+      //TODO: figure out why this fails
+      //read comment in test above
+      expect(repo.save).toBeCalledTimes(1);
+      expect(repo.save).toBeCalledWith({
+        instrumentTicker: "TEST",
+        instrumentName: "TEST",
       });
     });
 

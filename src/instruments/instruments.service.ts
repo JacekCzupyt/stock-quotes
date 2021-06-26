@@ -39,17 +39,21 @@ export class InstrumentsService {
     }
   }
 
-  async addNew(instrument: InstrumentInput): Promise<Instrument> {
+  async addNew(instrumentInput: InstrumentInput): Promise<Instrument> {
     //check if instrument with this ticker already exists
-
     const existingInstrument = await this.instrumentsRepository.findOne(
-      instrument.instrumentTicker
+      instrumentInput.instrumentTicker
     );
     if (existingInstrument) {
       throw new BadRequestException(
-        `Instrument with ticker "${instrument.instrumentTicker}" already exists`
+        `Instrument with ticker "${instrumentInput.instrumentTicker}" already exists`
       );
     }
-    return this.instrumentsRepository.save({ ...instrument });
+    //if no instrument name is provided, it will default to be the same as the ticker
+    return this.instrumentsRepository.save({
+      ...instrumentInput,
+      instrumentName:
+        instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
+    });
   }
 }

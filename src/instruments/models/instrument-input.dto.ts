@@ -5,6 +5,6 @@ export class InstrumentInput {
   @Field()
   instrumentTicker: string;
 
-  @Field()
-  instrumentName: string;
+  @Field({ nullable: true })
+  instrumentName?: string;
 }
