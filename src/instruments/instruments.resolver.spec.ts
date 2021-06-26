@@ -56,13 +56,13 @@ describe("InstrumentsResolver", () => {
 
   describe("getInstruments", () => {
     it("should return an array of instruments", async () => {
-      expect(resolver.getInstruments()).resolves.toBe(instrumentsArray);
+      await expect(resolver.getInstruments()).resolves.toBe(instrumentsArray);
     });
   });
 
   describe("getInstrument", () => {
     it("should return an instrument", async () => {
-      expect(resolver.getInstrument("AAPL")).resolves.toEqual(
+      await expect(resolver.getInstrument("AAPL")).resolves.toEqual(
         instrumentsArray[0]
       );
       expect(service.getOne).toBeCalledWith("AAPL");
@@ -81,10 +81,10 @@ describe("InstrumentsResolver", () => {
 
       let tick = "ticker";
 
-      expect(resolver.getInstrument(tick)).rejects.toThrowError(
+      await expect(resolver.getInstrument(tick)).rejects.toThrowError(
         NotFoundException
       );
-      expect(resolver.getInstrument(tick)).rejects.toThrowError(
+      await expect(resolver.getInstrument(tick)).rejects.toThrowError(
         `No instrument with ticker "${tick}"`
       );
     });
@@ -92,10 +92,12 @@ describe("InstrumentsResolver", () => {
 
   describe("addInstrument", () => {
     it("should make a new instrument", async () => {
-      expect(resolver.addInstrument(instrumentMutation)).resolves.toEqual({
-        ...instrumentMutation,
-        quotes: Promise.resolve([]),
-      });
+      await expect(resolver.addInstrument(instrumentMutation)).resolves.toEqual(
+        {
+          ...instrumentMutation,
+          quotes: Promise.resolve([]),
+        }
+      );
 
       expect(service.addNew).toBeCalledTimes(1);
       expect(service.addNew).toBeCalledWith(instrumentMutation);
@@ -112,10 +114,12 @@ describe("InstrumentsResolver", () => {
           );
         });
 
-      expect(resolver.addInstrument(instrumentMutation)).rejects.toThrowError(
-        BadRequestException
-      );
-      expect(resolver.addInstrument(instrumentMutation)).rejects.toThrowError(
+      await expect(
+        resolver.addInstrument(instrumentMutation)
+      ).rejects.toThrowError(BadRequestException);
+      await expect(
+        resolver.addInstrument(instrumentMutation)
+      ).rejects.toThrowError(
         `No instrument with ticker "${instrumentMutation.instrumentTicker}"`
       );
     });

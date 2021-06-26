@@ -52,17 +52,19 @@ describe("InstrumentsService", () => {
 
   describe("getAllInstruments", () => {
     it("should return an array of instruments", async () => {
-      expect(service.getAll()).resolves.toEqual(instrumentsArray);
+      await expect(service.getAll()).resolves.toEqual(instrumentsArray);
     });
   });
 
   describe("getOneInstrument", () => {
-    it("should return an instrument", () => {
+    it("should return an instrument", async () => {
       const repoSpy = jest.spyOn(repo, "findOneOrFail");
-      expect(service.getOne("AAPL")).resolves.toEqual(instrumentsArray[0]);
+      await expect(service.getOne("AAPL")).resolves.toEqual(
+        instrumentsArray[0]
+      );
       expect(repoSpy).toBeCalledWith("AAPL");
     });
-    it("should throw an error", () => {
+    it("should throw an error", async () => {
       const repoSpy = jest
         .spyOn(repo, "findOneOrFail")
         .mockImplementation((id) => {
@@ -70,8 +72,8 @@ describe("InstrumentsService", () => {
         });
 
       const call = () => service.getOne("invalid ticker");
-      expect(call()).rejects.toThrowError(NotFoundException);
-      expect(call()).rejects.toThrowError(
+      await expect(call()).rejects.toThrowError(NotFoundException);
+      await expect(call()).rejects.toThrowError(
         'No instrument with ticker "invalid ticker"'
       );
 
@@ -80,14 +82,14 @@ describe("InstrumentsService", () => {
   });
 
   describe("addInstrument", () => {
-    it("should add an instruemnt", () => {
+    it("should add an instruemnt", async () => {
       const repoSpy = jest
         .spyOn(repo, "findOne")
         .mockImplementation(async (e) => {
           return Promise.resolve(null);
         });
 
-      expect(
+      await expect(
         service.addNew({
           instrumentTicker: "TEST",
           instrumentName: "test-instrument",
@@ -101,11 +103,6 @@ describe("InstrumentsService", () => {
       expect(repo.findOne).toBeCalledTimes(1);
       expect(repo.findOne).toBeCalledWith("TEST");
 
-      //TODO: figure out why this fails
-      //For some reason jest states that repo.save is never called
-      //I've sepnt 3 hours trying to fix it now, the debugger sees it triggered,
-      //it returns the correct result, all other tests work, things that depend
-      //on repo.save work, I don't understand why it fails.
       expect(repo.save).toBeCalledTimes(1);
       expect(repo.save).toBeCalledWith({
         instrumentTicker: "TEST",
@@ -113,14 +110,14 @@ describe("InstrumentsService", () => {
       });
     });
 
-    it("should add an instruemnt with default name", () => {
+    it("should add an instruemnt with default name", async () => {
       const repoSpy = jest
         .spyOn(repo, "findOne")
         .mockImplementation(async (e) => {
           return Promise.resolve(null);
         });
 
-      expect(
+      await expect(
         service.addNew({
           instrumentTicker: "TEST",
         })
@@ -133,8 +130,6 @@ describe("InstrumentsService", () => {
       expect(repo.findOne).toBeCalledTimes(1);
       expect(repo.findOne).toBeCalledWith("TEST");
 
-      //TODO: figure out why this fails
-      //read comment in test above
       expect(repo.save).toBeCalledTimes(1);
       expect(repo.save).toBeCalledWith({
         instrumentTicker: "TEST",
@@ -142,14 +137,14 @@ describe("InstrumentsService", () => {
       });
     });
 
-    it("should throw an error", () => {
+    it("should throw an error", async () => {
       const call = () =>
         service.addNew({
           instrumentTicker: "AAPL",
           instrumentName: "instrument with duplicate id",
         });
-      expect(call()).rejects.toThrowError(BadRequestException);
-      expect(call()).rejects.toThrowError(
+      await expect(call()).rejects.toThrowError(BadRequestException);
+      await expect(call()).rejects.toThrowError(
         'Instrument with ticker "AAPL" already exists'
       );
 
