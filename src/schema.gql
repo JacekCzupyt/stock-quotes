@@ -36,11 +36,11 @@ type Mutation {
 
 input InstrumentInput {
   instrumentTicker: String!
-  instrumentName: String!
+  instrumentName: String
 }
 
 input QuoteInput {
-  instrument: String!
+  instrument: InstrumentInput!
   timestamp: Timestamp!
 
   """Price in cents"""

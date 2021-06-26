@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { Instrument } from "src/instruments/models/instrument.entity";
+import { Instrument } from "../instruments/models/instrument.entity";
 import { QuoteInput } from "./models/quote-input.dto";
 import { Quote } from "./models/quote.entity";
 import { QuotesResolver } from "./quotes.resolver";
@@ -28,7 +28,7 @@ const quotesArray: Quote[] = [
 ];
 
 let quoteMutation: QuoteInput = {
-  instrument: "AAPL",
+  instrument: { instrumentTicker: "AAPL", instrumentName: "input name" },
   timestamp: new Date(100),
   price: 200,
 };
@@ -72,13 +72,13 @@ describe("QuotesResolver", () => {
 
   describe("getQuotes", () => {
     it("should return an array of quotes", async () => {
-      expect(resolver.getQuotes()).resolves.toBe(quotesArray);
+      await expect(resolver.getQuotes()).resolves.toBe(quotesArray);
     });
   });
 
   describe("getQuote", () => {
     it("should return a qoute", async () => {
-      expect(resolver.getQuote(0)).resolves.toEqual(quotesArray[0]);
+      await expect(resolver.getQuote(0)).resolves.toEqual(quotesArray[0]);
       expect(service.getOne).toBeCalledWith(0);
     });
 
@@ -89,8 +89,10 @@ describe("QuotesResolver", () => {
         throw new NotFoundException(`No quote with id "${id}"`);
       });
 
-      expect(resolver.getQuote(-1)).rejects.toThrowError(NotFoundException);
-      expect(resolver.getQuote(-1)).rejects.toThrowError(
+      await expect(resolver.getQuote(-1)).rejects.toThrowError(
+        NotFoundException
+      );
+      await expect(resolver.getQuote(-1)).rejects.toThrowError(
         `No quote with id "-1"`
       );
     });
@@ -98,7 +100,7 @@ describe("QuotesResolver", () => {
 
   describe("addQuote", () => {
     it("should make a new quote", async () => {
-      expect(resolver.addQuote(quoteMutation)).resolves.toEqual({
+      await expect(resolver.addQuote(quoteMutation)).resolves.toEqual({
         ...quoteMutation,
         id: 1,
         instrument: mockInstrument,
@@ -119,10 +121,10 @@ describe("QuotesResolver", () => {
           );
         });
 
-      expect(resolver.addQuote(quoteMutation)).rejects.toThrowError(
+      await expect(resolver.addQuote(quoteMutation)).rejects.toThrowError(
         BadRequestException
       );
-      expect(resolver.addQuote(quoteMutation)).rejects.toThrowError(
+      await expect(resolver.addQuote(quoteMutation)).rejects.toThrowError(
         `No instrument with ticker "${quoteMutation.instrument}"`
       );
     });
