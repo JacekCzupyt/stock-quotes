@@ -9,6 +9,7 @@ import {
   Repository,
   Transaction,
 } from "typeorm";
+import { BadRequestException } from "@nestjs/common";
 
 @Injectable()
 export class QuotesService {
@@ -45,14 +46,14 @@ export class QuotesService {
   async addNew(quote: QuoteInput): Promise<Quote> {
     let inst;
     try {
-      //find existing instruemnt with this ticker
-      inst = await this.instrumentsService.getOne(
-        quote.instrument.instrumentTicker
-      );
+      //try to add new instrument
+      inst = await this.instrumentsService.addNew(quote.instrument);
     } catch (e) {
-      //create a new instrument
-      if (e instanceof NotFoundException) {
-        inst = await this.instrumentsService.addNew(quote.instrument);
+      if (e instanceof BadRequestException) {
+        //if failed, get existing instrument
+        inst = await this.instrumentsService.getOne(
+          quote.instrument.instrumentTicker
+        );
       } else {
         throw e;
       }
