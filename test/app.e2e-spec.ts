@@ -27,13 +27,14 @@ describe("AppController (e2e)", () => {
         }),
         TypeOrmModule.forRoot({
           type: "postgres",
-          host: "localhost",
-          port: 5431,
+          host: "test-db",
+          port: 5432,
           username: "test-user",
           password: "test-password",
-          database: "stock-quotes",
-          entities: [Quote, Instrument],
+          database: "stock-quotes-tests",
+          entities: [Quote, Instrument], //I couldn't get the path style entities (like in the ormconfig file) to work
           synchronize: true,
+          dropSchema: true,
         }),
       ],
     }).compile();
