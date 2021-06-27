@@ -116,15 +116,34 @@ describe("AppController (e2e)", () => {
       instrumentName: "test 2",
     });
 
-    await expect(request1).resolves.toEqual({
-      instrumentTicker: ticker,
-      instrumentName: "test 1",
-    });
+    try {
+      await expect(request1).resolves.toEqual({
+        instrumentTicker: ticker,
+        instrumentName: "test 1",
+      });
 
-    await expect(request2).rejects.toThrowError(BadRequestException);
-    await expect(request2).rejects.toThrowError(
-      `Instrument with ticker "${ticker}" already exists`
-    );
+      await expect(request2).rejects.toThrowError(BadRequestException);
+      await expect(request2).rejects.toThrowError(
+        `Instrument with ticker "${ticker}" already exists`
+      );
+    } catch (e) {
+      await expect(request2).resolves.toEqual({
+        instrumentTicker: ticker,
+        instrumentName: "test 2",
+      });
+
+      await expect(request1).rejects.toThrowError(BadRequestException);
+      await expect(request1).rejects.toThrowError(
+        `Instrument with ticker "${ticker}" already exists`
+      );
+    }
+
+    let inst = await instrumentsResolver.getInstrument(ticker);
+    await expect(inst).toMatchObject({
+      instrumentTicker: ticker,
+    });
+    await expect(inst).toHaveProperty("instrumentName");
+    await expect(["test 1", "test 2"]).toContain(inst.instrumentName);
   });
 
   //Sends two concurent requests to add a quote for a new ticker
