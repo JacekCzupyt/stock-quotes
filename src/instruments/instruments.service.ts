@@ -4,9 +4,8 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { EntityNotFoundError, QueryFailedError, Repository } from "typeorm";
 import { InstrumentInput } from "./models/instrument-input.dto";
-import { InstrumentMutation } from "./models/instrument-mutation.dto";
 import { Instrument } from "./models/instrument.entity";
 
 @Injectable()
@@ -16,19 +15,23 @@ export class InstrumentsService {
     private instrumentsRepository: Repository<Instrument>
   ) {}
 
-  async getAll(): Promise<Instrument[]> {
-    return this.instrumentsRepository.find();
+  async getAll(num?: number, offset?: number): Promise<Instrument[]> {
+    //DefalutPageSize can be swapped for some default value if we want pagiantion by default
+    const DefalutPageSize = undefined;
+
+    return this.instrumentsRepository.find({
+      take: num ?? DefalutPageSize,
+      skip: offset ?? 0,
+    });
   }
 
-  async getOne(input_instrument: InstrumentInput): Promise<Instrument> {
+  async getOne(instrumentTicker: string): Promise<Instrument> {
     try {
-      return await this.instrumentsRepository.findOneOrFail(
-        input_instrument.instrument_ticker
-      );
+      return await this.instrumentsRepository.findOneOrFail(instrumentTicker);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new NotFoundException(
-          `No instrument with ticker "${input_instrument.instrument_ticker}"`
+          `No instrument with ticker "${instrumentTicker}"`
         );
       } else {
         throw e;
@@ -36,21 +39,26 @@ export class InstrumentsService {
     }
   }
 
-  async addNew(instrument: InstrumentMutation): Promise<Instrument> {
-    //check if instrument with this ticker already exists
+  async addNew(instrumentInput: InstrumentInput): Promise<Instrument> {
     try {
-      await this.instrumentsRepository.findOneOrFail(
-        instrument.instrument_ticker
+      //transactions are enabled by default for the insert operation, therfore a duplicate instrument
+      //will never be inserted because of concurent requests, instead an QueryFailedError will be thrown
+      let result = await this.instrumentsRepository.insert({
+        ...instrumentInput,
+        instrumentName:
+          instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
+      });
+      return await this.instrumentsRepository.findOne(
+        instrumentInput.instrumentTicker
       );
     } catch (e) {
-      if (e instanceof EntityNotFoundError) {
-        return this.instrumentsRepository.save({ ...instrument });
+      if (e instanceof QueryFailedError) {
+        throw new BadRequestException(
+          `Instrument with ticker "${instrumentInput.instrumentTicker}" already exists`
+        );
       } else {
         throw e;
       }
     }
-    throw new BadRequestException(
-      `Instrument with ticker "${instrument.instrument_ticker}" already exists`
-    );
   }
 }

@@ -17,38 +17,30 @@ type Quote {
 scalar Timestamp
 
 type Instrument {
-  instrument_ticker: String!
-  instrument_name: String!
+  instrumentTicker: String!
+  instrumentName: String!
   quotes: [Quote!]!
 }
 
 type Query {
-  getInstruments: [Instrument!]!
-  getInstrument(instrumentTicker: InstrumentInput!): Instrument!
-  getQuotes: [Quote!]!
-  getQuote(quoteInput: QuoteInput!): Quote!
-}
-
-input InstrumentInput {
-  instrument_ticker: String!
-}
-
-input QuoteInput {
-  id: Int!
+  getInstruments(offset: Int, number: Int): [Instrument!]!
+  getInstrument(instrumentTicker: String!): Instrument!
+  getQuotes(offset: Int, number: Int): [Quote!]!
+  getQuote(id: Int!): Quote!
 }
 
 type Mutation {
-  addInstrument(newInstrument: InstrumentMutation!): Instrument!
-  addQuote(newQuote: QuoteMutation!): Quote!
+  addInstrument(newInstrument: InstrumentInput!): Instrument!
+  addQuote(newQuote: QuoteInput!): Quote!
 }
 
-input InstrumentMutation {
-  instrument_ticker: String!
-  instrument_name: String!
+input InstrumentInput {
+  instrumentTicker: String!
+  instrumentName: String
 }
 
-input QuoteMutation {
-  instrument: String!
+input QuoteInput {
+  instrument: InstrumentInput!
   timestamp: Timestamp!
 
   """Price in cents"""

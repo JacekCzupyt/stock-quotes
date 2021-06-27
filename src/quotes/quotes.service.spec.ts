@@ -1,12 +1,14 @@
 import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { QuoteMutation } from "./models/quote-mutation.dto";
+import { QuoteInput } from "./models/quote-input.dto";
 import { QuotesService } from "./quotes.service";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Quote } from "./models/quote.entity";
 import { EntityNotFoundError, Repository } from "typeorm";
 import { InstrumentsService } from "../instruments/instruments.service";
 import { Instrument } from "../instruments/models/instrument.entity";
+import { InstrumentInput } from "src/instruments/models/instrument-input.dto";
+import { BadRequestException } from "@nestjs/common";
 
 const quotesArray: Quote[] = [
   {
@@ -29,15 +31,21 @@ const quotesArray: Quote[] = [
   },
 ];
 
-let quoteMutation: QuoteMutation = {
-  instrument: "AAPL",
+let quoteMutation: QuoteInput = {
+  instrument: { instrumentTicker: "AAPL", instrumentName: "input name" },
   timestamp: new Date(100),
   price: 200,
 };
 
 let mockInstrument: Instrument = {
-  instrument_ticker: "AAPL",
-  instrument_name: "Apple Inc",
+  instrumentTicker: "AAPL",
+  instrumentName: "Apple Inc",
+  quotes: [],
+};
+
+let mockNewInstrument: Instrument = {
+  instrumentTicker: "AAPL",
+  instrumentName: "input name",
   quotes: [],
 };
 
@@ -69,6 +77,7 @@ describe("QuotesService", () => {
           provide: InstrumentsService,
           useValue: {
             getOne: jest.fn().mockResolvedValue(mockInstrument),
+            addNew: jest.fn().mockResolvedValue(mockNewInstrument),
           },
         },
       ],
@@ -84,33 +93,43 @@ describe("QuotesService", () => {
   });
 
   describe("getQuotes", () => {
-    it("should return an array of qoutes", () => {
-      expect(service.getAll()).resolves.toEqual(quotesArray);
+    it("should return an array of qoutes", async () => {
+      await expect(service.getAll()).resolves.toEqual(quotesArray);
     });
   });
 
   describe("getQuote", () => {
-    it("should return a qoute", () => {
-      expect(service.getOne({ id: 1 })).resolves.toEqual(quotesArray[0]);
+    it("should return a qoute", async () => {
+      await expect(service.getOne(1)).resolves.toEqual(quotesArray[0]);
       expect(repo.findOneOrFail).toBeCalledWith(1);
     });
-    it("should throw an error", () => {
+
+    it("should throw an error", async () => {
       const repoSpy = jest
         .spyOn(repo, "findOneOrFail")
         .mockImplementation((id) => {
           throw new EntityNotFoundError(Quote, id);
         });
 
-      const call = () => service.getOne({ id: -1 });
-      expect(call()).rejects.toThrowError(NotFoundException);
-      expect(call()).rejects.toThrowError('No quote with id "-1"');
+      const call = () => service.getOne(-1);
+      await expect(call()).rejects.toThrowError(NotFoundException);
+      await expect(call()).rejects.toThrowError('No quote with id "-1"');
 
+      expect(repoSpy).toBeCalledTimes(2);
       expect(repoSpy).toBeCalledWith(-1);
     });
   });
 
   describe("addQuote", () => {
-    it("should add an quote to the array", async () => {
+    it("should add a quote to an existing instrument", async () => {
+      const addNewSpy = jest
+        .spyOn(instrumentService, "addNew")
+        .mockRejectedValue(
+          new BadRequestException(
+            `Instrument with ticker "${quoteMutation.instrument.instrumentTicker}" already exists`
+          )
+        );
+
       const call = () => service.addNew(quoteMutation);
       await expect(call()).resolves.toEqual({
         ...quoteMutation,
@@ -118,10 +137,13 @@ describe("QuotesService", () => {
         id: 1,
       });
 
+      expect(instrumentService.addNew).toBeCalledTimes(1);
+      expect(instrumentService.addNew).toBeCalledWith(quoteMutation.instrument);
+
       expect(instrumentService.getOne).toBeCalledTimes(1);
-      expect(instrumentService.getOne).toBeCalledWith({
-        instrument_ticker: quoteMutation.instrument,
-      });
+      expect(instrumentService.getOne).toBeCalledWith(
+        quoteMutation.instrument.instrumentTicker
+      );
 
       expect(repo.create).toBeCalledTimes(1);
       expect(repo.create).toBeCalledWith({
@@ -139,18 +161,34 @@ describe("QuotesService", () => {
       );
     });
 
-    it("should throw an error", () => {
-      const repoSpy = jest
-        .spyOn(instrumentService, "getOne")
-        .mockRejectedValue(
-          new NotFoundException(`No instrument with ticker "AAPL"`)
-        );
-
+    it("should add a quote to a new instrument", async () => {
       const call = () => service.addNew(quoteMutation);
-      expect(call()).rejects.toThrowError(NotFoundException);
-      expect(call()).rejects.toThrowError('No instrument with ticker "AAPL"');
 
-      expect(repo.save).toBeCalledTimes(0);
+      await expect(call()).resolves.toEqual({
+        ...quoteMutation,
+        instrument: mockNewInstrument,
+        id: 1,
+      });
+
+      expect(instrumentService.addNew).toBeCalledTimes(1);
+      expect(instrumentService.addNew).toBeCalledWith(quoteMutation.instrument);
+
+      expect(instrumentService.getOne).toBeCalledTimes(0);
+
+      expect(repo.create).toBeCalledTimes(1);
+      expect(repo.create).toBeCalledWith({
+        ...quoteMutation,
+        instrument: mockNewInstrument,
+      });
+
+      expect(repo.save).toBeCalledTimes(1);
+      expect(repo.save).toBeCalledWith(
+        Promise.reject({
+          ...quoteMutation,
+          instrument: mockNewInstrument,
+          id: 1,
+        })
+      );
     });
   });
 });

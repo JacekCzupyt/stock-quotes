@@ -1,0 +1,18 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: test-user
+      POSTGRES_PASSWORD: test-password
+      POSTGRES_DB: stock-quotes
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5431:5432"
+  web:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
