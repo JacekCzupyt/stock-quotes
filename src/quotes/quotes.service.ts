@@ -6,10 +6,12 @@ import { InjectRepository } from "@nestjs/typeorm";
 import {
   Connection,
   EntityNotFoundError,
+  getManager,
   Repository,
   Transaction,
 } from "typeorm";
 import { BadRequestException } from "@nestjs/common";
+import { Instrument } from "../instruments/models/instrument.entity";
 
 @Injectable()
 export class QuotesService {
@@ -44,23 +46,27 @@ export class QuotesService {
   }
 
   async addNew(quote: QuoteInput): Promise<Quote> {
-    let inst;
-    try {
-      //try to add new instrument
-      inst = await this.instrumentsService.addNew(quote.instrument);
-    } catch (e) {
-      if (e instanceof BadRequestException) {
-        //if failed, get existing instrument
-        inst = await this.instrumentsService.getOne(
-          quote.instrument.instrumentTicker
-        );
-      } else {
-        throw e;
-      }
-    }
-    //add the new quote
-    return await this.quotesRepository.save(
-      this.quotesRepository.create({ ...quote, instrument: inst })
-    );
+    return await getManager().transaction(async (manager) => {
+      await manager
+        .createQueryBuilder()
+        .insert()
+        .into(Instrument)
+        .values({
+          ...quote.instrument,
+          instrumentName:
+            quote.instrument.instrumentName ??
+            quote.instrument.instrumentTicker,
+        })
+        .onConflict(`("instrumentTicker") DO NOTHING`)
+        .execute();
+      let inst: Instrument = await manager.findOneOrFail(
+        Instrument,
+        quote.instrument.instrumentTicker
+      );
+      return await manager.save(
+        Quote,
+        manager.create(Quote, { ...quote, instrument: inst })
+      );
+    });
   }
 }
