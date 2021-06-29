@@ -27,8 +27,8 @@ describe("AppController (e2e)", () => {
         }),
         TypeOrmModule.forRoot({
           type: "postgres",
-          host: "test-db",
-          port: 5432,
+          host: "localhost",
+          port: 5430,
           username: "test-user",
           password: "test-password",
           database: "stock-quotes-tests",
