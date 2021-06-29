@@ -46,7 +46,7 @@ export class QuotesService {
   }
 
   async addNew(quote: QuoteInput): Promise<Quote> {
-    return await getManager().transaction(async (manager) => {
+    return await getManager().transaction("READ COMMITTED", async (manager) => {
       await manager
         .createQueryBuilder()
         .insert()

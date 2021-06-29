@@ -46,17 +46,21 @@ export class InstrumentsService {
 
   async addNew(instrumentInput: InstrumentInput): Promise<Instrument> {
     try {
-      return await getManager().transaction(async (manager) => {
-        await manager.insert(Instrument, {
-          ...instrumentInput,
-          instrumentName:
-            instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
-        });
-        return await manager.findOne(
-          Instrument,
-          instrumentInput.instrumentTicker
-        );
-      });
+      return await getManager().transaction(
+        "READ COMMITTED",
+        async (manager) => {
+          await manager.insert(Instrument, {
+            ...instrumentInput,
+            instrumentName:
+              instrumentInput.instrumentName ??
+              instrumentInput.instrumentTicker,
+          });
+          return await manager.findOne(
+            Instrument,
+            instrumentInput.instrumentTicker
+          );
+        }
+      );
     } catch (e) {
       if (e instanceof QueryFailedError) {
         throw new BadRequestException(
