@@ -77,7 +77,7 @@ describe("InstrumentsService", () => {
     });
   });
 
-  describe("addInstrument", () => {
+  /*describe("addInstrument", () => {
     it("should add an instruemnt", async () => {
       await expect(
         service.addNew({
@@ -149,5 +149,5 @@ describe("InstrumentsService", () => {
       });
       expect(repo.findOne).toBeCalledTimes(0);
     });
-  });
+  });*/
 });

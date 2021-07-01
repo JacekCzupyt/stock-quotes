@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
+  EntityManager,
   EntityNotFoundError,
   getManager,
   QueryFailedError,
@@ -70,5 +71,29 @@ export class InstrumentsService {
         throw e;
       }
     }
+  }
+
+  async insertIfNotExist(
+    instrumentInput: InstrumentInput,
+    entityManager: EntityManager = null
+  ) {
+    return await (entityManager ?? getManager())
+      .createQueryBuilder()
+      .insert()
+      .into(Instrument)
+      .values({
+        ...instrumentInput,
+        instrumentName:
+          instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
+      })
+      .onConflict(`("instrumentTicker") DO NOTHING`)
+      .execute();
+  }
+
+  async findOneOrFail(ticker: string, entityManager: EntityManager = null) {
+    return await (entityManager ?? getManager()).findOneOrFail(
+      Instrument,
+      ticker
+    );
   }
 }

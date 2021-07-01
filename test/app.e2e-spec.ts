@@ -10,11 +10,17 @@ import { Quote } from "../src/quotes/models/quote.entity";
 import { Instrument } from "../src/instruments/models/instrument.entity";
 import { InstrumentsResolver } from "../src/instruments/instruments.resolver";
 import { QuotesResolver } from "../src/quotes/quotes.resolver";
+import { QuotesService } from "../src/quotes/quotes.service";
+import { getConnection } from "typeorm";
+import { QuoteInput } from "../src/quotes/models/quote-input.dto";
+import { InstrumentsService } from "../src/instruments/instruments.service";
 
 describe("AppController (e2e)", () => {
   let app: INestApplication;
   let instrumentsResolver: InstrumentsResolver;
   let quotesResolver: QuotesResolver;
+  let quotesService: QuotesService;
+  let instrumentsService: InstrumentsService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -46,10 +52,19 @@ describe("AppController (e2e)", () => {
       moduleFixture.get<InstrumentsResolver>(InstrumentsResolver);
 
     quotesResolver = moduleFixture.get<QuotesResolver>(QuotesResolver);
+    quotesService = moduleFixture.get<QuotesService>(QuotesService);
+    instrumentsService =
+      moduleFixture.get<InstrumentsService>(InstrumentsService);
   });
 
   afterAll(async () => {
     await app.close();
+  });
+
+  const sleep = jest.fn((ms) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   });
 
   // My original test attempt - not sure if it my or jests fault, but it would throw Error: connect ECONNREFUSED
@@ -150,40 +165,43 @@ describe("AppController (e2e)", () => {
   //Only one instrument should be created, and it should accept both quotes
 
   it("should only create one instrument for both quotes", async () => {
+    debugger;
+
     const ticker = "QUOTE TEST";
 
-    let request1 = quotesResolver.addQuote({
-      timestamp: new Date(100),
+    let requests = await Promise.all([
+      quotesResolver.addQuote({
+        timestamp: new Date(100),
+        price: 100,
+        instrument: {
+          instrumentTicker: ticker,
+          instrumentName: "test 1",
+        },
+      }),
+      quotesResolver.addQuote({
+        timestamp: new Date(200),
+        price: 200,
+        instrument: {
+          instrumentTicker: ticker,
+          instrumentName: "test 2",
+        },
+      }),
+    ]);
+
+    let request1 = requests[0];
+    let request2 = requests[1];
+
+    await expect(request1).toMatchObject({
       price: 100,
-      instrument: {
-        instrumentTicker: ticker,
-        instrumentName: "test 1",
-      },
-    });
-
-    let request2 = quotesResolver.addQuote({
-      timestamp: new Date(200),
-      price: 200,
-      instrument: {
-        instrumentTicker: ticker,
-        instrumentName: "test 2",
-      },
-    });
-
-    await expect(request1).resolves.toMatchObject({
-      price: 100,
       timestamp: new Date(100),
     });
-    await expect(request1).resolves.toHaveProperty("id");
+    await expect(request1).toHaveProperty("id");
 
-    await expect(request2).resolves.toMatchObject({
+    await expect(request2).toMatchObject({
       price: 200,
       timestamp: new Date(200),
     });
-    await expect(request2).resolves.toHaveProperty("id");
-
-    await request1;
-    await request2;
+    await expect(request2).toHaveProperty("id");
 
     let inst = await instrumentsResolver.getInstrument(ticker);
     await expect(inst).toMatchObject({
@@ -192,5 +210,120 @@ describe("AppController (e2e)", () => {
     await expect(inst).toHaveProperty("instrumentName");
     await expect(["test 1", "test 2"]).toContain(inst.instrumentName);
     await expect(inst.quotes).resolves.toHaveLength(2);
+  });
+
+  /*
+  I'm not sure if this was the intended solution, but it's the best I can come up with.
+  Nestjs is single threaded, which as far as I'm aware makes sending 
+  multiple queries simultaniously impossible. The best we can do is send them one after another,
+  but as you already stated, that does not guarantee concurrency and induces non-determinism.
+
+  This is instead designed to simulate two instances of the instrumentService.addNew
+  method running concurrently. I couldn't find a way in jest to simulate this while using the
+  actual function, so I split it into its three queries, and simulated those.
+
+  */
+
+  it("should only create one instrument for both quotes 2", async () => {
+    debugger;
+    const ticker = "QUOTE TEST 2";
+
+    let quote1: QuoteInput = {
+      timestamp: new Date(100),
+      price: 100,
+      instrument: {
+        instrumentTicker: ticker,
+        instrumentName: "test 1",
+      },
+    };
+
+    let quote2: QuoteInput = {
+      timestamp: new Date(200),
+      price: 200,
+      instrument: {
+        instrumentTicker: ticker,
+        instrumentName: "test 2",
+      },
+    };
+
+    let insert2Finished = false;
+
+    let runner1 = await getConnection().createQueryRunner();
+    let runner2 = await getConnection().createQueryRunner();
+
+    await runner1.startTransaction();
+    await runner2.startTransaction();
+
+    //if we await, we technially aren't sending the insert queries concurrently
+    //but I don't belive there is any way in nestjs to guarantee their concurrency,
+    //so if we don't await, we'll loose determinism
+    await instrumentsService.insertIfNotExist(
+      quote1.instrument,
+      runner1.manager
+    );
+
+    //this should not be able to complete until runner1 transaction ends
+    instrumentsService
+      .insertIfNotExist(quote2.instrument, runner2.manager)
+      .then(() => {
+        insert2Finished = true;
+      });
+
+    await sleep(500);
+    expect(insert2Finished).toBe(false);
+
+    let instrument1 = await instrumentsService.findOneOrFail(
+      quote1.instrument.instrumentTicker,
+      runner1.manager
+    );
+
+    await sleep(500);
+    expect(insert2Finished).toBe(false);
+
+    let result1 = await quotesService.saveQuote(
+      { ...quote1, instrument: instrument1 },
+      runner1.manager
+    );
+
+    await sleep(500);
+    expect(insert2Finished).toBe(false);
+
+    await runner1.commitTransaction();
+
+    await sleep(10);
+    expect(insert2Finished).toBe(true);
+
+    let instrument2 = await instrumentsService.findOneOrFail(
+      quote2.instrument.instrumentTicker,
+      runner2.manager
+    );
+
+    let result2 = await quotesService.saveQuote(
+      { ...quote2, instrument: instrument2 },
+      runner2.manager
+    );
+
+    await runner2.commitTransaction();
+
+    expect(result1).toMatchObject({
+      price: 100,
+      timestamp: new Date(100),
+    });
+    expect(result1).toHaveProperty("id");
+
+    expect(result2).toMatchObject({
+      price: 200,
+      timestamp: new Date(200),
+    });
+    expect(result1).toHaveProperty("id");
+
+    let instrument = await instrumentsResolver.getInstrument(ticker);
+    await expect(instrument).toMatchObject({
+      instrumentTicker: ticker,
+      instrumentName: "test 1",
+    });
+    expect(instrument).toHaveProperty("instrumentName");
+    expect(["test 1", "test 2"]).toContain(instrument.instrumentName);
+    await expect(instrument.quotes).resolves.toHaveLength(2);
   });
 });
