@@ -1,5 +1,11 @@
 import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { Instrument } from "../../instruments/models/instrument.entity";
 
 @ObjectType()
@@ -11,7 +17,9 @@ export class Quote {
 
   @ManyToOne((type) => Instrument, (instrument) => instrument.quotes, {
     lazy: true,
+    nullable: false,
   })
+  @JoinColumn({ name: "instrumentTicker" })
   @Field((type) => Instrument)
   instrument: Instrument;
 
