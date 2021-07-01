@@ -5,13 +5,17 @@ import { Quote } from "./models/quote.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
   Connection,
+  DeepPartial,
+  EntityManager,
   EntityNotFoundError,
+  getConnection,
   getManager,
   Repository,
   Transaction,
 } from "typeorm";
 import { BadRequestException } from "@nestjs/common";
 import { Instrument } from "../instruments/models/instrument.entity";
+import { InstrumentInput } from "../instruments/models/instrument-input.dto";
 
 @Injectable()
 export class QuotesService {
@@ -47,26 +51,22 @@ export class QuotesService {
 
   async addNew(quote: QuoteInput): Promise<Quote> {
     return await getManager().transaction("READ COMMITTED", async (manager) => {
-      await manager
-        .createQueryBuilder()
-        .insert()
-        .into(Instrument)
-        .values({
-          ...quote.instrument,
-          instrumentName:
-            quote.instrument.instrumentName ??
-            quote.instrument.instrumentTicker,
-        })
-        .onConflict(`("instrumentTicker") DO NOTHING`)
-        .execute();
-      let inst: Instrument = await manager.findOneOrFail(
-        Instrument,
-        quote.instrument.instrumentTicker
+      await this.instrumentsService.insertIfNotExist(quote.instrument, manager);
+      let inst: Instrument = await this.instrumentsService.findOneOrFail(
+        quote.instrument.instrumentTicker,
+        manager
       );
-      return await manager.save(
-        Quote,
-        manager.create(Quote, { ...quote, instrument: inst })
-      );
+      return await this.saveQuote({ ...quote, instrument: inst }, manager);
     });
+  }
+
+  async saveQuote(
+    quote: DeepPartial<Quote>,
+    entityManager: EntityManager = null
+  ) {
+    return await (entityManager ?? getManager()).save(
+      Quote,
+      (entityManager ?? getManager()).create(Quote, quote)
+    );
   }
 }
