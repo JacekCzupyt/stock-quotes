@@ -4,7 +4,13 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, QueryFailedError, Repository } from "typeorm";
+import {
+  EntityManager,
+  EntityNotFoundError,
+  getManager,
+  QueryFailedError,
+  Repository,
+} from "typeorm";
 import { InstrumentInput } from "./models/instrument-input.dto";
 import { Instrument } from "./models/instrument.entity";
 
@@ -41,15 +47,20 @@ export class InstrumentsService {
 
   async addNew(instrumentInput: InstrumentInput): Promise<Instrument> {
     try {
-      //transactions are enabled by default for the insert operation, therfore a duplicate instrument
-      //will never be inserted because of concurent requests, instead an QueryFailedError will be thrown
-      let result = await this.instrumentsRepository.insert({
-        ...instrumentInput,
-        instrumentName:
-          instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
-      });
-      return await this.instrumentsRepository.findOne(
-        instrumentInput.instrumentTicker
+      return await getManager().transaction(
+        "READ COMMITTED",
+        async (manager) => {
+          await manager.insert(Instrument, {
+            ...instrumentInput,
+            instrumentName:
+              instrumentInput.instrumentName ??
+              instrumentInput.instrumentTicker,
+          });
+          return await manager.findOne(
+            Instrument,
+            instrumentInput.instrumentTicker
+          );
+        }
       );
     } catch (e) {
       if (e instanceof QueryFailedError) {
@@ -60,5 +71,29 @@ export class InstrumentsService {
         throw e;
       }
     }
+  }
+
+  async insertIfNotExist(
+    instrumentInput: InstrumentInput,
+    entityManager: EntityManager = null
+  ) {
+    return await (entityManager ?? getManager())
+      .createQueryBuilder()
+      .insert()
+      .into(Instrument)
+      .values({
+        ...instrumentInput,
+        instrumentName:
+          instrumentInput.instrumentName ?? instrumentInput.instrumentTicker,
+      })
+      .onConflict(`("instrumentTicker") DO NOTHING`)
+      .execute();
+  }
+
+  async findOneOrFail(ticker: string, entityManager: EntityManager = null) {
+    return await (entityManager ?? getManager()).findOneOrFail(
+      Instrument,
+      ticker
+    );
   }
 }

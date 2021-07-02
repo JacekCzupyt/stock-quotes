@@ -8,4 +8,4 @@ Run `docker-compose up -d db` or `npm run start:db` to start the database in a d
 
 Alternativly simply run `docker-compose up` or `npm run start:docker` to start both the database and the app in docker containers
 
-Concurency can be tested in the end-to-end test, by running `npm run test:docker-e2e`
+Concurency can be tested by first starting the testing database with `npm run start:db`, then initiation the end-to-end tests, by running `npm run test:e2e`

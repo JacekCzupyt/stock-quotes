@@ -120,7 +120,7 @@ describe("QuotesService", () => {
     });
   });
 
-  describe("addQuote", () => {
+  /*describe("addQuote", () => {
     it("should add a quote to an existing instrument", async () => {
       const addNewSpy = jest
         .spyOn(instrumentService, "addNew")
@@ -190,5 +190,5 @@ describe("QuotesService", () => {
         })
       );
     });
-  });
+  });*/
 });

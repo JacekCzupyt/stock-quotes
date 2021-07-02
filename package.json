@@ -20,7 +20,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     
-    "test:docker-e2e": "docker-compose -f docker-compose-e2e-tests.yml up --exit-code-from test-app",
+    "test:db": "docker-compose -f docker-compose-e2e-tests.yml up -d",
     "start:db": "docker-compose up -d db",
     "start:docker": "docker-compose up"
   },
