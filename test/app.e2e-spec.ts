@@ -300,8 +300,10 @@ describe("AppController (e2e)", () => {
     await sleep(500);
     expect(insert2Finished).toBe(false);
 
-    await runner1.commitTransaction();
-    await runner2.commitTransaction();
+    await Promise.all([
+      runner1.commitTransaction(),
+      runner2.commitTransaction(),
+    ]);
 
     await sleep(10);
     expect(insert2Finished).toBe(true);
