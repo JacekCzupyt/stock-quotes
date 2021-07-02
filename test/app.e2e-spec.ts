@@ -327,8 +327,21 @@ describe("AppController (e2e)", () => {
       instrumentTicker: ticker,
       instrumentName: "test 1",
     });
-    expect(instrument).toHaveProperty("instrumentName");
-    expect(["test 1", "test 2"]).toContain(instrument.instrumentName);
     await expect(instrument.quotes).resolves.toHaveLength(2);
+
+    await expect(instrument.quotes).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: result1.id,
+          timestamp: result1.timestamp,
+          price: result1.price,
+        }),
+        expect.objectContaining({
+          id: result2.id,
+          timestamp: result2.timestamp,
+          price: result2.price,
+        }),
+      ])
+    );
   });
 });
