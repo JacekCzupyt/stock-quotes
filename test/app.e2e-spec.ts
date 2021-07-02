@@ -251,8 +251,8 @@ describe("AppController (e2e)", () => {
     let runner1 = await getConnection().createQueryRunner();
     let runner2 = await getConnection().createQueryRunner();
 
-    await runner1.startTransaction();
-    await runner2.startTransaction();
+    await runner1.startTransaction("READ COMMITTED");
+    await runner2.startTransaction("READ COMMITTED");
 
     //if we await, we technially aren't sending the insert queries concurrently
     //but I don't belive there is any way in nestjs to guarantee their concurrency,
@@ -263,11 +263,23 @@ describe("AppController (e2e)", () => {
     );
 
     //this should not be able to complete until runner1 transaction ends
-    instrumentsService
+    let res2 = instrumentsService
       .insertIfNotExist(quote2.instrument, runner2.manager)
       .then(() => {
         insert2Finished = true;
-      });
+      })
+      .then(() =>
+        instrumentsService.findOneOrFail(
+          quote2.instrument.instrumentTicker,
+          runner2.manager
+        )
+      )
+      .then((instrument2) =>
+        quotesService.saveQuote(
+          { ...quote2, instrument: instrument2 },
+          runner2.manager
+        )
+      );
 
     await sleep(500);
     expect(insert2Finished).toBe(false);
@@ -289,21 +301,12 @@ describe("AppController (e2e)", () => {
     expect(insert2Finished).toBe(false);
 
     await runner1.commitTransaction();
+    await runner2.commitTransaction();
 
     await sleep(10);
     expect(insert2Finished).toBe(true);
 
-    let instrument2 = await instrumentsService.findOneOrFail(
-      quote2.instrument.instrumentTicker,
-      runner2.manager
-    );
-
-    let result2 = await quotesService.saveQuote(
-      { ...quote2, instrument: instrument2 },
-      runner2.manager
-    );
-
-    await runner2.commitTransaction();
+    let result2 = await res2;
 
     expect(result1).toMatchObject({
       price: 100,
